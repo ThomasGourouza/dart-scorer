@@ -1,0 +1,162 @@
+:host {
+  display: block;
+}
+
+.play-grid {
+  display: grid;
+  gap: 20px;
+}
+
+@media (min-width: 720px) {
+  .play-grid {
+    grid-template-columns: minmax(0, 1fr) 280px;
+    align-items: start;
+    gap: 24px;
+  }
+
+  .sidebar {
+    order: 0;
+  }
+
+  .main-panel {
+    order: 0;
+  }
+}
+
+.main-panel {
+  background: #151c24;
+  border: 1px solid #2a3441;
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.turn-header .label {
+  margin: 0;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+}
+
+.turn-header h2 {
+  margin: 6px 0 4px;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.score {
+  margin: 0 0 8px;
+  font-size: 2.75rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.attempt {
+  margin: 0 0 20px;
+  color: #cbd5e1;
+  font-size: 1rem;
+}
+
+.dart-form .field {
+  margin-bottom: 16px;
+}
+
+.dart-form label,
+.mult-field legend {
+  display: block;
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+
+.dart-form select {
+  width: 100%;
+  min-height: 48px;
+  font: inherit;
+  font-size: 1rem;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #3d4a5c;
+  background: #0f1419;
+  color: inherit;
+}
+
+.mult-field {
+  border: none;
+  margin: 0 0 20px;
+  padding: 0;
+}
+
+.mult-field .segmented label {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid #3d4a5c;
+  border-radius: 10px;
+  padding: 12px 10px;
+  text-align: center;
+  cursor: pointer;
+  background: #0f1419;
+}
+
+.mult-field .segmented label:has(input:checked):not(.disabled) {
+  border-color: #5b8cff;
+  background: #1a2433;
+}
+
+.mult-field .segmented label.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.mult-field .segmented input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.mult-field .segmented {
+  display: flex;
+  gap: 8px;
+}
+
+.primary {
+  width: 100%;
+  min-height: 52px;
+  font: inherit;
+  font-weight: 600;
+  font-size: 1.05rem;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #5b8cff, #3d6fe6);
+  color: #fff;
+  cursor: pointer;
+}
+
+.winner {
+  text-align: center;
+  padding: 12px 8px 8px;
+}
+
+.winner h2 {
+  margin: 0 0 8px;
+  font-size: 1.75rem;
+  font-weight: 750;
+}
+
+.winner-name {
+  margin: 0 0 16px;
+  font-size: 1.15rem;
+  color: #cbd5e1;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #94a3b8;
+}
+
+.sidebar {
+  min-width: 0;
+}

@@ -1,0 +1,9 @@
+<header class="topbar">
+  <a routerLink="/" class="brand">{{ title }}</a>
+  <button type="button" class="abort" (click)="abort()" [disabled]="!game.hasActiveGame()">
+    Abort game
+  </button>
+</header>
+<main class="shell">
+  <router-outlet />
+</main>

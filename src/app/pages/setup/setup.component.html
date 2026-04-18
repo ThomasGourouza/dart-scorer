@@ -1,0 +1,40 @@
+<div class="setup">
+  <h1>New game</h1>
+  <p class="lead">Choose players, names, and starting score (301 or 501).</p>
+
+  <section class="field">
+    <label for="playerCount">Number of players</label>
+    <select id="playerCount" [value]="playerCount" (change)="onCountChange($event)">
+      @for (c of [2, 3, 4, 5, 6, 7, 8, 9, 10]; track c) {
+        <option [value]="c">{{ c }}</option>
+      }
+    </select>
+  </section>
+
+  <section class="names">
+    <h2>Player names</h2>
+    @for (name of names; track $index; let idx = $index) {
+      <label class="name-row">
+        <span class="sr-only">Player {{ idx + 1 }} name</span>
+        <span class="name-label">P{{ idx + 1 }}</span>
+        <input type="text" [(ngModel)]="names[idx]" [name]="'p' + idx" autocomplete="name" />
+      </label>
+    }
+  </section>
+
+  <section class="field variant">
+    <span class="label-text">Game variant</span>
+    <div class="segmented" role="group" aria-label="Starting score">
+      <label>
+        <input type="radio" name="variant" [value]="301" [(ngModel)]="variant" />
+        <span>301</span>
+      </label>
+      <label>
+        <input type="radio" name="variant" [value]="501" [(ngModel)]="variant" />
+        <span>501</span>
+      </label>
+    </div>
+  </section>
+
+  <button type="button" class="primary" (click)="start()">Start game</button>
+</div>

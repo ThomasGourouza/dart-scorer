@@ -1,0 +1,19 @@
+<div class="scoreboard">
+  <h2 class="title">Scores</h2>
+  @if (game.playersList().length === 0) {
+    <p class="empty">No active game.</p>
+  } @else {
+    <ul class="list">
+      @for (p of game.playersList(); track $index; let i = $index) {
+        <li
+          class="row"
+          [class.current]="!game.isFinished() && i === game.currentIndex()"
+          [class.winner]="game.isFinished() && i === game.winner()"
+        >
+          <span class="name">{{ p.name }}</span>
+          <span class="val">{{ p.score }}</span>
+        </li>
+      }
+    </ul>
+  }
+</div>

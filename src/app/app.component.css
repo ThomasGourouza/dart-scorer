@@ -1,0 +1,64 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  background: #0f1419;
+  color: #e8eaed;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.45;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: max(12px, env(safe-area-inset-top)) 16px 12px;
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+  border-bottom: 1px solid #2a3441;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: color-mix(in srgb, #0f1419 92%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.brand {
+  color: inherit;
+  text-decoration: none;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  font-size: 1.05rem;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.abort {
+  font: inherit;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid #c25a5a;
+  background: transparent;
+  color: #ffb4b4;
+  cursor: pointer;
+}
+
+.abort:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.shell {
+  padding: 16px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+@media (min-width: 720px) {
+  .shell {
+    padding: 24px;
+  }
+}

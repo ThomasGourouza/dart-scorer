@@ -1,0 +1,59 @@
+<div class="play">
+  <div class="play-grid">
+    <main class="main-panel">
+      @if (game.isFinished()) {
+        <div class="winner" role="status">
+          <h2>Congratulations!</h2>
+          <p class="winner-name">{{ winnerName() }} wins.</p>
+          <p class="hint">Use <strong>Abort game</strong> in the top bar to start a new game.</p>
+        </div>
+      } @else {
+        <header class="turn-header">
+          <p class="label">Current player</p>
+          <h2>{{ game.currentPlayer()!.name }}</h2>
+          <p class="score">{{ game.currentPlayer()!.score }}</p>
+          <p class="attempt">Attempt {{ game.attempt() }} / 3</p>
+        </header>
+
+        <section class="dart-form" aria-label="Submit dart score">
+          <div class="field">
+            <label for="base">Sector</label>
+            <select
+              id="base"
+              [value]="selectedBase()"
+              (change)="onBaseChange(($any($event.target)).value)"
+            >
+              @for (b of dartBases; track b) {
+                <option [value]="b">{{ b === 0 ? '0 (miss)' : b === 25 ? '25 (outer bull)' : b === 50 ? '50 (inner bull)' : b }}</option>
+              }
+            </select>
+          </div>
+
+          <fieldset class="mult-field">
+            <legend>Multiplier</legend>
+            <div class="segmented">
+              @for (m of [1, 2, 3]; track m) {
+                <label [class.disabled]="!isMultAllowed(m)">
+                  <input
+                    type="radio"
+                    name="mult"
+                    [value]="m"
+                    [(ngModel)]="multiplier"
+                    [disabled]="!isMultAllowed(m)"
+                  />
+                  <span>×{{ m }}</span>
+                </label>
+              }
+            </div>
+          </fieldset>
+
+          <button type="button" class="primary" (click)="submit()">Submit attempt</button>
+        </section>
+      }
+    </main>
+
+    <aside class="sidebar" aria-label="Scores">
+      <app-scoreboard />
+    </aside>
+  </div>
+</div>
