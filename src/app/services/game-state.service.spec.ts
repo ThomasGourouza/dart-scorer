@@ -43,9 +43,10 @@ describe('GameStateService', () => {
   });
 
   it('should clamp multipliers for bull bases', () => {
-    expect(GameStateService.allowedMultipliers(25)).toEqual([1, 2]);
+    expect(GameStateService.allowedMultipliers(25)).toEqual([1]);
     expect(GameStateService.allowedMultipliers(50)).toEqual([1]);
-    expect(GameStateService.clampMultiplier(25, 3)).toBe(2);
+    expect(GameStateService.clampMultiplier(25, 3)).toBe(1);
+    expect(GameStateService.clampMultiplier(25, 2)).toBe(1);
     expect(GameStateService.clampMultiplier(50, 3)).toBe(1);
   });
 
@@ -86,10 +87,17 @@ describe('GameStateService', () => {
     svc.submitAttempt(20, 1);
     expect(svc.playersList()[0]!.score).toBe(281);
     expect(svc.canTakeBack()).toBe(true);
-    svc.takeBack();
+    expect(svc.takeBack()).toEqual({ base: 20, mult: 1 });
     expect(svc.playersList()[0]!.score).toBe(301);
     expect(svc.attempt()).toBe(1);
     expect(svc.canTakeBack()).toBe(false);
+  });
+
+  it('should return submitted sector and multiplier on take back', () => {
+    const svc = TestBed.inject(GameStateService);
+    svc.startGame([...twoPlayers], 301);
+    svc.submitAttempt(19, 3);
+    expect(svc.takeBack()).toEqual({ base: 19, mult: 3 });
   });
 
   it('should take back a winning dart', () => {

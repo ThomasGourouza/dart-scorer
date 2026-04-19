@@ -6,13 +6,17 @@
           class="anim-overlay"
           [class.anim-overlay--dart]="animState() === 'dart'"
           [class.anim-overlay--turn]="animState() === 'turn'"
+          [class.anim-overlay--undo]="animState() === 'undo'"
           aria-hidden="true"
         >
-          <div class="anim-board">
+          <div class="anim-board" [class.anim-board--undo]="animState() === 'undo'">
             <div class="anim-rings"></div>
             <div class="anim-bull"></div>
             @if (animState() === 'turn') {
               <p class="anim-caption">Next player</p>
+            }
+            @if (animState() === 'undo') {
+              <p class="anim-caption anim-caption--undo">Take back</p>
             }
           </div>
         </div>

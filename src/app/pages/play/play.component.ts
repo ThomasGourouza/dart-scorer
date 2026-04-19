@@ -7,8 +7,9 @@ import { getPlayerColor } from '../../theme/player-colors';
 
 const DART_ANIM_MS = 420;
 const TURN_ANIM_MS = 900;
+const UNDO_ANIM_MS = 400;
 
-export type AnimLayer = 'idle' | 'dart' | 'turn';
+export type AnimLayer = 'idle' | 'dart' | 'turn' | 'undo';
 
 @Component({
   selector: 'app-play',
@@ -117,8 +118,21 @@ export class PlayComponent implements OnDestroy {
   }
 
   protected takeBack(): void {
-    if (this.animState() !== 'idle') return;
-    this.game.takeBack();
-    this.resetDartUi();
+    if (this.animState() !== 'idle' || !this.game.canTakeBack()) return;
+    if (this.animTimerId !== undefined) {
+      clearTimeout(this.animTimerId);
+    }
+    const restored = this.game.takeBack();
+    if (restored) {
+      this.selectedBase.set(restored.base);
+      this.multiplier = GameStateService.clampMultiplier(restored.base, restored.mult);
+    } else {
+      this.resetDartUi();
+    }
+    this.animState.set('undo');
+    this.animTimerId = setTimeout(() => {
+      this.animState.set('idle');
+      this.animTimerId = undefined;
+    }, UNDO_ANIM_MS);
   }
 }

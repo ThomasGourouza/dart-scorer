@@ -5,6 +5,12 @@ export type GameVariant = 301 | 501;
 export type Multiplier = 1 | 2 | 3;
 export type SubmitResult = 'noop' | 'next_attempt' | 'next_player' | 'bust' | 'win';
 
+/** Sector + multiplier used on a scored dart (for take-back UI restore). */
+export interface SubmittedDart {
+  base: number;
+  mult: Multiplier;
+}
+
 export interface PlayerRow {
   name: string;
   score: number;
@@ -39,8 +45,9 @@ const VALID_BASES = new Set<number>([
 export const GAME_STORAGE_KEY = 'dart-scorer-game-v1';
 
 interface StoredGameJson {
-  v: 1 | 2;
+  v: 1 | 2 | 3;
   past?: GameSnapshot[];
+  dartLog?: Array<{ base?: unknown; mult?: unknown }>;
   players: Array<{ name: string; score: number; colorId?: string }>;
   variant: number;
   currentPlayerIndex: number;
@@ -51,8 +58,9 @@ interface StoredGameJson {
 }
 
 interface PersistedPayload extends StoredGameJson {
-  v: 2;
+  v: 3;
   past: GameSnapshot[];
+  dartLog: SubmittedDart[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -65,6 +73,8 @@ export class GameStateService {
   private readonly winnerIndex = signal<number | null>(null);
   private readonly active = signal(false);
   private readonly pastSnapshots = signal<GameSnapshot[]>([]);
+  /** One entry per scored dart; same length as pastSnapshots when in sync. */
+  private readonly dartLog = signal<SubmittedDart[]>([]);
 
   readonly playersList = this.players.asReadonly();
   readonly gameVariant = this.variant.asReadonly();
@@ -96,7 +106,7 @@ export class GameStateService {
   static allowedMultipliers(base: number): Multiplier[] {
     if (base === 0) return [1];
     if (base >= 1 && base <= 20) return [1, 2, 3];
-    if (base === 25) return [1, 2];
+    if (base === 25) return [1];
     if (base === 50) return [1];
     return [1];
   }
@@ -124,7 +134,7 @@ export class GameStateService {
       localStorage.removeItem(GAME_STORAGE_KEY);
       return;
     }
-    if ((data.v !== 1 && data.v !== 2) || !Array.isArray(data.players)) {
+    if ((data.v !== 1 && data.v !== 2 && data.v !== 3) || !Array.isArray(data.players)) {
       localStorage.removeItem(GAME_STORAGE_KEY);
       return;
     }
@@ -175,11 +185,13 @@ export class GameStateService {
     );
     this.active.set(data.active === true);
 
-    const pastRaw = data.v === 2 && Array.isArray(data.past) ? data.past : [];
+    const pastRaw =
+      (data.v === 2 || data.v === 3) && Array.isArray(data.past) ? data.past : [];
     const past = pastRaw
       .map((snap) => this.normalizeSnapshot(snap, rows.length))
       .filter((s): s is GameSnapshot => s !== null);
     this.pastSnapshots.set(past);
+    this.dartLog.set(this.parseDartLogForRestore(data.dartLog, past.length));
   }
 
   startGame(entries: GameStartEntry[], variant: GameVariant): void {
@@ -200,6 +212,7 @@ export class GameStateService {
     this.winnerIndex.set(null);
     this.active.set(true);
     this.pastSnapshots.set([]);
+    this.dartLog.set([]);
     this.persistToStorage();
   }
 
@@ -212,17 +225,27 @@ export class GameStateService {
     this.winnerIndex.set(null);
     this.active.set(false);
     this.pastSnapshots.set([]);
+    this.dartLog.set([]);
     this.clearStorage();
   }
 
-  /** Reverts the last scored attempt (unlimited depth through the whole game). */
-  takeBack(): void {
+  /**
+   * Reverts the last scored attempt. Returns the sector + multiplier that was
+   * submitted for that dart (for restoring the form), or null if nothing was undone.
+   */
+  takeBack(): SubmittedDart | null {
     const past = this.pastSnapshots();
-    if (!this.active() || this.players().length < 2 || past.length === 0) return;
+    const log = this.dartLog();
+    if (!this.active() || this.players().length < 2 || past.length === 0) {
+      return null;
+    }
     const snap = past[past.length - 1]!;
+    const lastDart = log.length > 0 ? log[log.length - 1]! : null;
     this.pastSnapshots.set(past.slice(0, -1));
+    this.dartLog.set(log.slice(0, -1));
     this.applySnapshot(snap);
     this.persistToStorage();
+    return lastDart;
   }
 
   submitAttempt(rawBase: number, multiplier: Multiplier): SubmitResult {
@@ -245,6 +268,7 @@ export class GameStateService {
       list[idx] = row;
       this.players.set(list);
       this.advanceToNextPlayer(list);
+      this.pushDartLog(base, mult);
       this.persistToStorage();
       return 'bust';
     }
@@ -254,6 +278,7 @@ export class GameStateService {
       list[idx] = row;
       this.players.set(list);
       this.winnerIndex.set(idx);
+      this.pushDartLog(base, mult);
       this.persistToStorage();
       return 'win';
     }
@@ -264,12 +289,39 @@ export class GameStateService {
 
     if (this.attemptNumber() < 3) {
       this.attemptNumber.update((a) => a + 1);
+      this.pushDartLog(base, mult);
       this.persistToStorage();
       return 'next_attempt';
     }
     this.advanceToNextPlayer(list);
+    this.pushDartLog(base, mult);
     this.persistToStorage();
     return 'next_player';
+  }
+
+  private pushDartLog(base: number, mult: Multiplier): void {
+    this.dartLog.update((d) => [...d, { base, mult }]);
+  }
+
+  private parseDartLogForRestore(
+    raw: unknown,
+    pastLength: number,
+  ): SubmittedDart[] {
+    if (pastLength === 0) return [];
+    if (!Array.isArray(raw)) {
+      return Array.from({ length: pastLength }, () => ({ base: 0, mult: 1 as Multiplier }));
+    }
+    const out: SubmittedDart[] = [];
+    for (let i = 0; i < pastLength; i++) {
+      const row = raw[i] as { base?: unknown; mult?: unknown } | undefined;
+      const b = Number(row?.['base']);
+      const base = Number.isFinite(b) ? GameStateService.normalizeBase(b) : 0;
+      const mr = Number(row?.['mult']);
+      const multRaw = mr === 2 || mr === 3 ? mr : 1;
+      const mult = GameStateService.clampMultiplier(base, multRaw as Multiplier);
+      out.push({ base, mult });
+    }
+    return out;
   }
 
   private pushUndoSnapshot(): void {
@@ -369,9 +421,12 @@ export class GameStateService {
     const vNow = this.variant();
     if (vNow === null) return;
 
+    const dartLog = this.dartLog().map((d) => ({ base: d.base, mult: d.mult }));
+
     const payload: PersistedPayload = {
-      v: 2,
+      v: 3,
       past,
+      dartLog,
       players: this.players().map((p) => ({
         name: p.name,
         score: p.score,
