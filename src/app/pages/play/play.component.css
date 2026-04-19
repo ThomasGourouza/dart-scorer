@@ -34,28 +34,42 @@
 }
 
 .turn-header .label {
-  margin: 0;
+  margin: 0 0 8px;
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: #94a3b8;
 }
 
+.turn-header__main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: 12px;
+}
+
 .turn-header h2 {
-  margin: 6px 0 4px;
+  margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
   color: #f1f5f9;
+  flex: 1 1 auto;
+  min-width: 0;
+  line-height: 1.2;
 }
 
 .score {
-  margin: 0 0 12px;
-  font-size: 2.75rem;
+  margin: 0;
+  font-size: clamp(1.75rem, 8vw, 2.75rem);
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
   color: var(--p-accent, #e8eaed);
   text-shadow: 0 0 28px color-mix(in srgb, var(--p-accent, #fff) 35%, transparent);
+  flex: 0 0 auto;
+  line-height: 1;
 }
 
 .attempt-badge {

@@ -38,9 +38,10 @@
         </div>
       } @else {
         <header class="turn-header">
-          <p class="label">Current player</p>
-          <h2>{{ game.currentPlayer()!.name }}</h2>
-          <p class="score">{{ game.currentPlayer()!.score }}</p>
+          <div class="turn-header__main">
+            <h2>{{ game.currentPlayer()!.name }}</h2>
+            <p class="score" aria-label="Total score">{{ game.currentPlayer()!.score }}</p>
+          </div>
           <div class="attempt-badge" aria-live="polite">
             <span class="attempt-badge__label">Dart</span>
             <span class="attempt-badge__val">{{ game.attempt() }}</span>
