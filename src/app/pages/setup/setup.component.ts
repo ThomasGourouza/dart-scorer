@@ -1,7 +1,15 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { GameStateService, GameVariant } from '../../services/game-state.service';
+import {
+  GameStateService,
+  GameStartEntry,
+  GameVariant,
+} from '../../services/game-state.service';
+import {
+  PLAYER_COLOR_PALETTE,
+  defaultColorIdsForCount,
+} from '../../theme/player-colors';
 
 @Component({
   selector: 'app-setup',
@@ -11,14 +19,15 @@ import { GameStateService, GameVariant } from '../../services/game-state.service
   styleUrl: './setup.component.css',
 })
 export class SetupComponent {
-  protected playerCount = 2;
-  protected names: string[] = ['Player 1', 'Player 2'];
-  protected variant: GameVariant = 501;
+  protected readonly game = inject(GameStateService);
+  private readonly router = inject(Router);
 
-  constructor(
-    private readonly game: GameStateService,
-    private readonly router: Router,
-  ) {}
+  protected readonly palette = PLAYER_COLOR_PALETTE;
+
+  protected playerCount = 2;
+  protected names: string[] = ['Vika', 'Tom'];
+  protected colorIds: string[] = defaultColorIdsForCount(2);
+  protected variant: GameVariant = 301;
 
   protected onCountChange(event: Event): void {
     const el = event.target as HTMLSelectElement;
@@ -30,10 +39,43 @@ export class SetupComponent {
     if (this.names.length > n) {
       this.names.length = n;
     }
+    while (this.colorIds.length < n) {
+      const used = new Set(this.colorIds);
+      const next = PLAYER_COLOR_PALETTE.find((p) => !used.has(p.id));
+      this.colorIds.push(next?.id ?? PLAYER_COLOR_PALETTE[0]!.id);
+    }
+    if (this.colorIds.length > n) {
+      this.colorIds.length = n;
+    }
+  }
+
+  protected colorDisabledForRow(row: number, colorId: string): boolean {
+    return this.colorIds.some((c, j) => j !== row && c === colorId);
+  }
+
+  protected pickColor(row: number, colorId: string): void {
+    if (this.colorDisabledForRow(row, colorId)) return;
+    this.colorIds[row] = colorId;
   }
 
   protected start(): void {
-    this.game.startGame(this.names.slice(0, this.playerCount), this.variant);
+    const entries: GameStartEntry[] = [];
+    for (let i = 0; i < this.playerCount; i++) {
+      entries.push({
+        name: this.names[i] ?? `Player ${i + 1}`,
+        colorId: this.colorIds[i] ?? defaultColorIdsForCount(this.playerCount)[i]!,
+      });
+    }
+    this.game.startGame(entries, this.variant);
     void this.router.navigate(['/play']);
+  }
+
+  protected resume(): void {
+    void this.router.navigate(['/play']);
+  }
+
+  /** Row indices 0 .. playerCount-1 for template iteration. */
+  protected slotIndexes(): number[] {
+    return Array.from({ length: this.playerCount }, (_, i) => i);
   }
 }

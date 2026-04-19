@@ -44,8 +44,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "8kB",
+                  "maximumError": "14kB"
                 }
               ],
               "outputHashing": "all"
@@ -60,6 +60,13 @@
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "allowedHosts": [
+              ".ngrok-free.dev",
+              ".ngrok.io",
+              "nonomissible-deliciously-ora.ngrok-free.dev"
+            ]
+          },
           "configurations": {
             "production": {
               "buildTarget": "dart-scorer:build:production"

@@ -32,22 +32,31 @@
 .row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   padding: 12px 14px;
   border-radius: 12px;
-  background: #0f1419;
-  border: 1px solid #2a3441;
+  background: color-mix(in srgb, var(--row-surface, transparent) 100%, #0f1419);
+  border: 1px solid color-mix(in srgb, var(--row-ring, #2a3441) 35%, #2a3441);
+  border-left: 4px solid var(--row-accent, #64748b);
 }
 
 .row.current {
-  border-color: #5b8cff;
-  box-shadow: 0 0 0 1px color-mix(in srgb, #5b8cff 35%, transparent);
+  border-color: color-mix(in srgb, var(--row-accent, #5b8cff) 55%, #2a3441);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--row-accent, #5b8cff) 28%, transparent);
 }
 
 .row.winner {
-  border-color: #34d399;
-  box-shadow: 0 0 0 1px color-mix(in srgb, #34d399 35%, transparent);
+  border-color: color-mix(in srgb, var(--row-accent, #34d399) 55%, #2a3441);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--row-accent, #34d399) 32%, transparent);
+}
+
+.row-dot {
+  flex: 0 0 10px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--row-accent, #64748b);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--row-accent, #fff) 45%, transparent);
 }
 
 .name {
@@ -56,12 +65,14 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  flex: 1;
 }
 
 .val {
   font-variant-numeric: tabular-nums;
   font-weight: 800;
   font-size: 1.15rem;
+  color: #f1f5f9;
 }
 
 @media (max-width: 719px) {

@@ -7,9 +7,11 @@
       @for (p of game.playersList(); track $index; let i = $index) {
         <li
           class="row"
+          [ngStyle]="rowVars(p.colorId)"
           [class.current]="!game.isFinished() && i === game.currentIndex()"
           [class.winner]="game.isFinished() && i === game.winner()"
         >
+          <span class="row-dot" aria-hidden="true"></span>
           <span class="name">{{ p.name }}</span>
           <span class="val">{{ p.score }}</span>
         </li>

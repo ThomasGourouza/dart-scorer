@@ -1,33 +1,78 @@
 <div class="play">
   <div class="play-grid">
-    <main class="main-panel">
+    <main class="main-panel" [ngStyle]="game.isFinished() ? winnerTheme() : panelTheme()">
+      @if (animState() !== 'idle') {
+        <div
+          class="anim-overlay"
+          [class.anim-overlay--dart]="animState() === 'dart'"
+          [class.anim-overlay--turn]="animState() === 'turn'"
+          aria-hidden="true"
+        >
+          <div class="anim-board">
+            <div class="anim-rings"></div>
+            <div class="anim-bull"></div>
+            @if (animState() === 'turn') {
+              <p class="anim-caption">Next player</p>
+            }
+          </div>
+        </div>
+      }
+
       @if (game.isFinished()) {
         <div class="winner" role="status">
           <h2>Congratulations!</h2>
           <p class="winner-name">{{ winnerName() }} wins.</p>
           <p class="hint">Use <strong>Abort game</strong> in the top bar to start a new game.</p>
+          <button
+            type="button"
+            class="secondary takeback"
+            (click)="takeBack()"
+            [disabled]="!game.canTakeBack() || animState() !== 'idle'"
+          >
+            Take back
+          </button>
         </div>
       } @else {
         <header class="turn-header">
           <p class="label">Current player</p>
           <h2>{{ game.currentPlayer()!.name }}</h2>
           <p class="score">{{ game.currentPlayer()!.score }}</p>
-          <p class="attempt">Attempt {{ game.attempt() }} / 3</p>
+          <div class="attempt-badge" aria-live="polite">
+            <span class="attempt-badge__label">Dart</span>
+            <span class="attempt-badge__val">{{ game.attempt() }}</span>
+            <span class="attempt-badge__of">/</span>
+            <span class="attempt-badge__max">3</span>
+          </div>
         </header>
 
         <section class="dart-form" aria-label="Submit dart score">
-          <div class="field">
-            <label for="base">Sector</label>
-            <select
-              id="base"
-              [value]="selectedBase()"
-              (change)="onBaseChange(($any($event.target)).value)"
-            >
+          <fieldset class="sector-field">
+            <legend>Sector</legend>
+            <div class="sector-grid" role="group">
               @for (b of dartBases; track b) {
-                <option [value]="b">{{ b === 0 ? '0 (miss)' : b === 25 ? '25 (outer bull)' : b === 50 ? '50 (inner bull)' : b }}</option>
+                <button
+                  type="button"
+                  class="sector-cell"
+                  [class.sector-cell--selected]="selectedBase() === b"
+                  [disabled]="animState() !== 'idle'"
+                  (click)="pickBase(b)"
+                  [attr.aria-pressed]="selectedBase() === b"
+                >
+                  <span class="sector-cell__text">
+                    @if (b === 0) {
+                      Miss
+                    } @else if (b === 25) {
+                      <span class="sector-stack"><span class="sector-num">25</span><small>outer</small></span>
+                    } @else if (b === 50) {
+                      <span class="sector-stack"><span class="sector-num">50</span><small>inner</small></span>
+                    } @else {
+                      {{ b }}
+                    }
+                  </span>
+                </button>
               }
-            </select>
-          </div>
+            </div>
+          </fieldset>
 
           <fieldset class="mult-field">
             <legend>Multiplier</legend>
@@ -39,7 +84,7 @@
                     name="mult"
                     [value]="m"
                     [(ngModel)]="multiplier"
-                    [disabled]="!isMultAllowed(m)"
+                    [disabled]="!isMultAllowed(m) || animState() !== 'idle'"
                   />
                   <span>×{{ m }}</span>
                 </label>
@@ -47,7 +92,24 @@
             </div>
           </fieldset>
 
-          <button type="button" class="primary" (click)="submit()">Submit attempt</button>
+          <div class="actions-row">
+            <button
+              type="button"
+              class="primary"
+              (click)="submit()"
+              [disabled]="animState() !== 'idle'"
+            >
+              Submit attempt
+            </button>
+            <button
+              type="button"
+              class="secondary takeback"
+              (click)="takeBack()"
+              [disabled]="!game.canTakeBack() || animState() !== 'idle'"
+            >
+              Take back
+            </button>
+          </div>
         </section>
       }
     </main>
