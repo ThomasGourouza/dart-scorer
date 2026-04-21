@@ -13,7 +13,7 @@ export interface PlayerColorDef {
 }
 
 export const PLAYER_COLOR_PALETTE: readonly PlayerColorDef[] = [
-  { id: 'coral', label: 'Coral', accent: '#f97066', accentMuted: 'rgba(249,112,102,0.22)', surface: 'rgba(249,112,102,0.08)', ring: '#f97066' },
+  { id: 'lilac', label: 'Lilac', accent: '#e879f9', accentMuted: 'rgba(232,121,249,0.22)', surface: 'rgba(232,121,249,0.09)', ring: '#e879f9' },
   { id: 'sky', label: 'Sky', accent: '#38bdf8', accentMuted: 'rgba(56,189,248,0.22)', surface: 'rgba(56,189,248,0.08)', ring: '#38bdf8' },
   { id: 'mint', label: 'Mint', accent: '#34d399', accentMuted: 'rgba(52,211,153,0.22)', surface: 'rgba(52,211,153,0.08)', ring: '#34d399' },
   { id: 'violet', label: 'Violet', accent: '#a78bfa', accentMuted: 'rgba(167,139,250,0.25)', surface: 'rgba(167,139,250,0.1)', ring: '#a78bfa' },
@@ -22,7 +22,7 @@ export const PLAYER_COLOR_PALETTE: readonly PlayerColorDef[] = [
   { id: 'lime', label: 'Lime', accent: '#a3e635', accentMuted: 'rgba(163,230,53,0.2)', surface: 'rgba(163,230,53,0.08)', ring: '#a3e635' },
   { id: 'azure', label: 'Azure', accent: '#22d3ee', accentMuted: 'rgba(34,211,238,0.22)', surface: 'rgba(34,211,238,0.08)', ring: '#22d3ee' },
   { id: 'peach', label: 'Peach', accent: '#fdba74', accentMuted: 'rgba(253,186,116,0.22)', surface: 'rgba(253,186,116,0.08)', ring: '#fdba74' },
-  { id: 'lilac', label: 'Lilac', accent: '#e879f9', accentMuted: 'rgba(232,121,249,0.22)', surface: 'rgba(232,121,249,0.09)', ring: '#e879f9' },
+  { id: 'coral', label: 'Coral', accent: '#f97066', accentMuted: 'rgba(249,112,102,0.22)', surface: 'rgba(249,112,102,0.08)', ring: '#f97066' },
 ] as const;
 
 export function getPlayerColor(id: string | undefined): PlayerColorDef {
