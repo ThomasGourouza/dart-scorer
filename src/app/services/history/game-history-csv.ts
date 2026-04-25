@@ -12,7 +12,7 @@ export function buildGameHistoryCsv(args: BuildHistoryCsvArgs): string {
     'recorded_at',
     'player_index',
     'player_name',
-    'turn',
+    'round',
     'attempt',
     'base',
     'multiplier',

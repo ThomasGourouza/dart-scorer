@@ -25,7 +25,7 @@
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--p-accent, transparent) 18%, transparent);
 }
 
-.turn-header {
+.round-header {
   padding: 12px 14px 16px;
   border-radius: 14px;
   background: var(--p-surface, transparent);
@@ -33,7 +33,7 @@
   margin-bottom: 18px;
 }
 
-.turn-header .label {
+.round-header .label {
   margin: 0 0 8px;
   font-size: 0.8rem;
   text-transform: uppercase;
@@ -41,7 +41,7 @@
   color: #94a3b8;
 }
 
-.turn-header__main {
+.round-header__main {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -50,7 +50,7 @@
   margin-bottom: 12px;
 }
 
-.turn-header h2 {
+.round-header h2 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
@@ -343,7 +343,7 @@
   animation: ringPulse 0.55s ease-out infinite;
 }
 
-.anim-overlay--turn .anim-rings {
+.anim-overlay--round .anim-rings {
   animation-duration: 0.75s;
 }
 
@@ -356,7 +356,7 @@
   animation: bullHit 0.45s ease-out infinite;
 }
 
-.anim-overlay--turn .anim-bull {
+.anim-overlay--round .anim-bull {
   width: 24%;
   height: 24%;
   animation-duration: 0.6s;

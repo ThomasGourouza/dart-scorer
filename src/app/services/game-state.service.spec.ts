@@ -17,7 +17,7 @@ describe('GameStateService', () => {
     localStorage.removeItem(GAME_STORAGE_KEY);
   });
 
-  it('should bust on third attempt and revert the whole turn', () => {
+  it('should bust on third attempt and revert the whole round', () => {
     const svc = TestBed.inject(GameStateService);
     svc.startGame([...twoPlayers], 100 as GameVariant);
     expect(svc.currentIndex()).toBe(0);

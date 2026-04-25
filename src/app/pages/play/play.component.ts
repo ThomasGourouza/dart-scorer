@@ -12,10 +12,10 @@ import { GameHistoryTimelineComponent } from './components/game-history-timeline
 import { WinnerCardComponent } from './components/winner-card/winner-card.component';
 
 const DART_ANIM_MS = 420;
-const TURN_ANIM_MS = 900;
+const ROUND_ANIM_MS = 900;
 const UNDO_ANIM_MS = 400;
 
-export type AnimLayer = 'idle' | 'dart' | 'turn' | 'undo';
+export type AnimLayer = 'idle' | 'dart' | 'round' | 'undo';
 
 @Component({
   selector: 'app-play',
@@ -119,8 +119,8 @@ export class PlayComponent implements OnDestroy {
     }
 
     const isTurn = result === 'next_player' || result === 'bust';
-    this.animState.set(isTurn ? 'turn' : 'dart');
-    const ms = isTurn ? TURN_ANIM_MS : DART_ANIM_MS;
+    this.animState.set(isTurn ? 'round' : 'dart');
+    const ms = isTurn ? ROUND_ANIM_MS : DART_ANIM_MS;
 
     this.animTimerId = setTimeout(() => {
       this.resetDartUi();

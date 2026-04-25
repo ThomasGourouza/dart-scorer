@@ -17,20 +17,20 @@
   font-size: 0.95rem;
 }
 
-.turn-list {
+.round-list {
   display: grid;
   gap: 12px;
 }
 
-.turn-card {
-  border: 1px solid color-mix(in srgb, var(--turn-accent, #2f3c4d) 55%, #2f3c4d);
+.round-card {
+  border: 1px solid color-mix(in srgb, var(--round-accent, #2f3c4d) 55%, #2f3c4d);
   background: #151c24;
   border-radius: 14px;
   padding: 12px;
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--turn-accent, #5b8cff) 12%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--round-accent, #5b8cff) 12%, transparent);
 }
 
-.turn-card__head {
+.round-card__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -38,26 +38,26 @@
   margin-bottom: 10px;
 }
 
-.turn-card__title {
+.round-card__title {
   display: flex;
   align-items: center;
   gap: 10px;
   min-width: 0;
 }
 
-.turn-pill {
+.round-pill {
   display: inline-flex;
   align-items: center;
   padding: 6px 10px;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--turn-accent, #3d4a5c) 55%, #3d4a5c);
-  background: color-mix(in srgb, var(--turn-accent, #0f1419) 12%, #0f1419);
+  border: 1px solid color-mix(in srgb, var(--round-accent, #3d4a5c) 55%, #3d4a5c);
+  background: color-mix(in srgb, var(--round-accent, #0f1419) 12%, #0f1419);
   font-weight: 750;
   font-size: 0.85rem;
   color: #e2e8f0;
 }
 
-.turn-player {
+.round-player {
   font-weight: 700;
   color: #f1f5f9;
   min-width: 0;
@@ -66,7 +66,7 @@
   white-space: nowrap;
 }
 
-.turn-meta {
+.round-meta {
   color: #94a3b8;
   font-size: 0.85rem;
   flex: 0 0 auto;

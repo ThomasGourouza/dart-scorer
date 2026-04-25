@@ -5,14 +5,14 @@
         <div
           class="anim-overlay"
           [class.anim-overlay--dart]="animState() === 'dart'"
-          [class.anim-overlay--turn]="animState() === 'turn'"
+          [class.anim-overlay--round]="animState() === 'round'"
           [class.anim-overlay--undo]="animState() === 'undo'"
           aria-hidden="true"
         >
           <div class="anim-board" [class.anim-board--undo]="animState() === 'undo'">
             <div class="anim-rings"></div>
             <div class="anim-bull"></div>
-            @if (animState() === 'turn') {
+            @if (animState() === 'round') {
               <p class="anim-caption">Next player</p>
             }
             @if (animState() === 'undo') {
@@ -39,8 +39,8 @@
           (submitEmail)="sendEmailHistory($event)"
         />
       } @else {
-        <header class="turn-header">
-          <div class="turn-header__main">
+        <header class="round-header">
+          <div class="round-header__main">
             <h2>{{ game.currentPlayer()!.name }}</h2>
             <p class="score" aria-label="Total score">{{ game.currentPlayer()!.score }}</p>
           </div>
