@@ -11,6 +11,19 @@ export interface SubmittedDart {
   mult: Multiplier;
 }
 
+export interface GameHistoryRow {
+  gameStartedAtIso: string | null;
+  recordedAtIso: string;
+  playerIndex: number;
+  playerName: string;
+  attemptNumber: number;
+  base: number;
+  mult: Multiplier;
+  delta: number;
+  scoreBefore: number;
+  scoreAfter: number;
+}
+
 export interface PlayerRow {
   name: string;
   score: number;
@@ -75,6 +88,8 @@ export class GameStateService {
   private readonly pastSnapshots = signal<GameSnapshot[]>([]);
   /** One entry per scored dart; same length as pastSnapshots when in sync. */
   private readonly dartLog = signal<SubmittedDart[]>([]);
+  private readonly gameStartedAtIso = signal<string | null>(null);
+  private readonly historyRows = signal<GameHistoryRow[]>([]);
 
   readonly playersList = this.players.asReadonly();
   readonly gameVariant = this.variant.asReadonly();
@@ -83,6 +98,8 @@ export class GameStateService {
   readonly turnStartScore = this.scoreAtTurnStart.asReadonly();
   readonly winner = this.winnerIndex.asReadonly();
   readonly isActive = this.active.asReadonly();
+  readonly startedAtIso = this.gameStartedAtIso.asReadonly();
+  readonly history = this.historyRows.asReadonly();
 
   readonly hasActiveGame = computed(
     () => this.active() && this.players().length >= 2,
@@ -213,6 +230,8 @@ export class GameStateService {
     this.active.set(true);
     this.pastSnapshots.set([]);
     this.dartLog.set([]);
+    this.gameStartedAtIso.set(new Date().toISOString());
+    this.historyRows.set([]);
     this.persistToStorage();
   }
 
@@ -226,6 +245,8 @@ export class GameStateService {
     this.active.set(false);
     this.pastSnapshots.set([]);
     this.dartLog.set([]);
+    this.gameStartedAtIso.set(null);
+    this.historyRows.set([]);
     this.clearStorage();
   }
 
@@ -243,6 +264,7 @@ export class GameStateService {
     const lastDart = log.length > 0 ? log[log.length - 1]! : null;
     this.pastSnapshots.set(past.slice(0, -1));
     this.dartLog.set(log.slice(0, -1));
+    this.historyRows.update((h) => (h.length > 0 ? h.slice(0, -1) : h));
     this.applySnapshot(snap);
     this.persistToStorage();
     return lastDart;
@@ -258,6 +280,9 @@ export class GameStateService {
     const row = list[idx];
     if (!row) return 'noop';
 
+    const recordedAtIso = new Date().toISOString();
+    const attemptNo = this.attemptNumber();
+    const scoreBefore = row.score;
     this.pushUndoSnapshot();
 
     const delta = base === 0 ? 0 : base * mult;
@@ -269,6 +294,17 @@ export class GameStateService {
       this.players.set(list);
       this.advanceToNextPlayer(list);
       this.pushDartLog(base, mult);
+      this.pushHistoryRow({
+        recordedAtIso,
+        playerIndex: idx,
+        playerName: row.name,
+        attemptNumber: attemptNo,
+        base,
+        mult,
+        delta,
+        scoreBefore,
+        scoreAfter: row.score,
+      });
       this.persistToStorage();
       return 'bust';
     }
@@ -279,6 +315,17 @@ export class GameStateService {
       this.players.set(list);
       this.winnerIndex.set(idx);
       this.pushDartLog(base, mult);
+      this.pushHistoryRow({
+        recordedAtIso,
+        playerIndex: idx,
+        playerName: row.name,
+        attemptNumber: attemptNo,
+        base,
+        mult,
+        delta,
+        scoreBefore,
+        scoreAfter: 0,
+      });
       this.persistToStorage();
       return 'win';
     }
@@ -290,13 +337,90 @@ export class GameStateService {
     if (this.attemptNumber() < 3) {
       this.attemptNumber.update((a) => a + 1);
       this.pushDartLog(base, mult);
+      this.pushHistoryRow({
+        recordedAtIso,
+        playerIndex: idx,
+        playerName: row.name,
+        attemptNumber: attemptNo,
+        base,
+        mult,
+        delta,
+        scoreBefore,
+        scoreAfter: candidate,
+      });
       this.persistToStorage();
       return 'next_attempt';
     }
     this.advanceToNextPlayer(list);
     this.pushDartLog(base, mult);
+    this.pushHistoryRow({
+      recordedAtIso,
+      playerIndex: idx,
+      playerName: row.name,
+      attemptNumber: attemptNo,
+      base,
+      mult,
+      delta,
+      scoreBefore,
+      scoreAfter: candidate,
+    });
     this.persistToStorage();
     return 'next_player';
+  }
+
+  getHistoryCsv(): string {
+    const started = this.gameStartedAtIso();
+    const winnerIdx = this.winnerIndex();
+    const winnerName =
+      winnerIdx !== null ? (this.players()[winnerIdx]?.name ?? '') : '';
+    const header = [
+      'game_started_at',
+      'recorded_at',
+      'player_index',
+      'player_name',
+      'attempt',
+      'base',
+      'multiplier',
+      'delta',
+      'score_before',
+      'score_after',
+      'winner_name',
+    ].join(',');
+
+    const rows = this.historyRows().map((r) =>
+      [
+        GameStateService.csvCell(started ?? ''),
+        GameStateService.csvCell(r.recordedAtIso),
+        String(r.playerIndex),
+        GameStateService.csvCell(r.playerName),
+        String(r.attemptNumber),
+        String(r.base),
+        String(r.mult),
+        String(r.delta),
+        String(r.scoreBefore),
+        String(r.scoreAfter),
+        GameStateService.csvCell(winnerName),
+      ].join(','),
+    );
+
+    return [header, ...rows].join('\n') + '\n';
+  }
+
+  private static csvCell(v: string): string {
+    if (v.includes('"')) v = v.replaceAll('"', '""');
+    if (v.includes(',') || v.includes('\n') || v.includes('\r') || v.includes('"')) {
+      return `"${v}"`;
+    }
+    return v;
+  }
+
+  private pushHistoryRow(
+    row: Omit<GameHistoryRow, 'gameStartedAtIso'>,
+  ): void {
+    this.historyRows.update((h) => [
+      ...h,
+      { ...row, gameStartedAtIso: this.gameStartedAtIso() },
+    ]);
   }
 
   private pushDartLog(base: number, mult: Multiplier): void {

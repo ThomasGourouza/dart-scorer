@@ -33,6 +33,8 @@ export class PlayComponent implements OnDestroy {
   readonly selectedBase = signal<number>(0);
   multiplier: Multiplier = 1;
   readonly animState = signal<AnimLayer>('idle');
+  readonly emailDialogOpen = signal(false);
+  emailTo = '';
 
   private animTimerId: ReturnType<typeof setTimeout> | undefined;
 
@@ -140,5 +142,41 @@ export class PlayComponent implements OnDestroy {
     if (!this.game.hasActiveGame()) return;
     this.game.abortGame();
     void this.router.navigate(['/']);
+  }
+
+  downloadHistory(): void {
+    const csv = this.game.getHistoryCsv();
+    const started = this.game.startedAtIso() ?? new Date().toISOString();
+    const stamp = started.replaceAll(/[-:]/g, '').replaceAll('T', '-').slice(0, 15);
+    const filename = `dart-scorer-history-${stamp}.csv`;
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  openEmailDialog(): void {
+    this.emailTo = '';
+    this.emailDialogOpen.set(true);
+  }
+
+  closeEmailDialog(): void {
+    this.emailDialogOpen.set(false);
+  }
+
+  sendEmailHistory(): void {
+    const to = this.emailTo.trim();
+    if (to.length === 0) return;
+
+    const csv = this.game.getHistoryCsv();
+    const subject = 'Dart scorer - game history (CSV)';
+    const body = `Hi,\n\nHere is the game history CSV:\n\n${csv}`;
+    const mailto = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailto;
+    this.emailDialogOpen.set(false);
   }
 }
