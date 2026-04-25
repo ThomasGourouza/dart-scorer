@@ -378,6 +378,7 @@ export class GameStateService {
       'recorded_at',
       'player_index',
       'player_name',
+      'turn',
       'attempt',
       'base',
       'multiplier',
@@ -387,12 +388,15 @@ export class GameStateService {
       'winner_name',
     ].join(',');
 
-    const rows = this.historyRows().map((r) =>
-      [
-        GameStateService.csvCell(started ?? ''),
-        GameStateService.csvCell(r.recordedAtIso),
-        String(r.playerIndex),
+    let turn = 0;
+    const rows = this.historyRows().map((r) => {
+      if (r.attemptNumber === 1) turn += 1;
+      return [
+        GameStateService.csvCell(GameStateService.formatIsoForCsv(started)),
+        GameStateService.csvCell(GameStateService.formatIsoForCsv(r.recordedAtIso)),
+        String(r.playerIndex + 1),
         GameStateService.csvCell(r.playerName),
+        String(turn),
         String(r.attemptNumber),
         String(r.base),
         String(r.mult),
@@ -400,10 +404,24 @@ export class GameStateService {
         String(r.scoreBefore),
         String(r.scoreAfter),
         GameStateService.csvCell(winnerName),
-      ].join(','),
-    );
+      ].join(',');
+    });
 
     return [header, ...rows].join('\n') + '\n';
+  }
+
+  private static formatIsoForCsv(iso: string | null): string {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (!Number.isFinite(d.getTime())) return '';
+    const pad2 = (n: number) => String(n).padStart(2, '0');
+    const dd = pad2(d.getDate());
+    const mm = pad2(d.getMonth() + 1);
+    const yyyy = String(d.getFullYear());
+    const hh = pad2(d.getHours());
+    const min = pad2(d.getMinutes());
+    const ss = pad2(d.getSeconds());
+    return `${dd}/${mm}/${yyyy} - ${hh}:${min}:${ss}`;
   }
 
   private static csvCell(v: string): string {
