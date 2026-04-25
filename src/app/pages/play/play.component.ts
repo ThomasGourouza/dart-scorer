@@ -1,8 +1,8 @@
 import { NgStyle } from '@angular/common';
-import { Component, OnDestroy, inject, signal } from '@angular/core';
+import { Component, OnDestroy, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { GameStateService, Multiplier, SubmitResult } from '../../services/game-state.service';
+import { GameHistoryRow, GameStateService, Multiplier, SubmitResult } from '../../services/game-state.service';
 import { ScoreboardComponent } from '../../components/scoreboard/scoreboard.component';
 import { getPlayerColor } from '../../theme/player-colors';
 
@@ -35,6 +35,19 @@ export class PlayComponent implements OnDestroy {
   readonly animState = signal<AnimLayer>('idle');
   readonly emailDialogOpen = signal(false);
   emailTo = '';
+  readonly historyTurns = signal<Array<{
+    turn: number;
+    playerName: string;
+    throws: Array<{
+      idxInTurn: number;
+      base: number;
+      mult: Multiplier;
+      delta: number;
+      scoreBefore: number;
+      scoreAfter: number;
+      atIso: string;
+    }>;
+  }>>([]);
 
   private animTimerId: ReturnType<typeof setTimeout> | undefined;
 
@@ -42,6 +55,49 @@ export class PlayComponent implements OnDestroy {
     if (this.animTimerId !== undefined) {
       clearTimeout(this.animTimerId);
     }
+  }
+
+  formatIsoUi(iso: string): string {
+    const d = new Date(iso);
+    if (!Number.isFinite(d.getTime())) return iso;
+    const pad2 = (n: number) => String(n).padStart(2, '0');
+    return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} - ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+  }
+
+  private rebuildHistoryTurns(rows: readonly GameHistoryRow[]): void {
+    const turns: Array<{
+      turn: number;
+      playerName: string;
+      throws: Array<{
+        idxInTurn: number;
+        base: number;
+        mult: Multiplier;
+        delta: number;
+        scoreBefore: number;
+        scoreAfter: number;
+        atIso: string;
+      }>;
+    }> = [];
+
+    let turnNo = 0;
+    for (const r of rows) {
+      if (r.attemptNumber === 1 || turns.length === 0) {
+        turnNo += 1;
+        turns.push({ turn: turnNo, playerName: r.playerName, throws: [] });
+      }
+      const t = turns[turns.length - 1]!;
+      t.throws.push({
+        idxInTurn: r.attemptNumber,
+        base: r.base,
+        mult: r.mult,
+        delta: r.delta,
+        scoreBefore: r.scoreBefore,
+        scoreAfter: r.scoreAfter,
+        atIso: r.recordedAtIso,
+      });
+    }
+
+    this.historyTurns.set(turns);
   }
 
   panelTheme(): Record<string, string> {
@@ -178,5 +234,11 @@ export class PlayComponent implements OnDestroy {
     const mailto = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.location.href = mailto;
     this.emailDialogOpen.set(false);
+  }
+
+  constructor() {
+    effect(() => {
+      this.rebuildHistoryTurns(this.game.history());
+    });
   }
 }

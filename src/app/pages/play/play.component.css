@@ -519,6 +519,141 @@
   color: #cbd5e1;
 }
 
+.history {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #2a3441;
+}
+
+.history h3 {
+  margin: 0 0 12px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.history-empty {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
+
+.turn-list {
+  display: grid;
+  gap: 12px;
+}
+
+.turn-card {
+  border: 1px solid #2f3c4d;
+  background: #151c24;
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.turn-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.turn-card__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.turn-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid #3d4a5c;
+  background: #0f1419;
+  font-weight: 750;
+  font-size: 0.85rem;
+  color: #e2e8f0;
+}
+
+.turn-player {
+  font-weight: 700;
+  color: #f1f5f9;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.turn-meta {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  flex: 0 0 auto;
+}
+
+.throw-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.throw-row {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid #223042;
+  background: #0f1419;
+}
+
+.throw-num {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  color: #e2e8f0;
+  background: #151c24;
+  border: 1px solid #2f3c4d;
+}
+
+.throw-main {
+  display: grid;
+  gap: 2px;
+}
+
+.throw-hit {
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.throw-sub {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: baseline;
+  color: #cbd5e1;
+  font-size: 0.9rem;
+}
+
+.throw-delta {
+  color: #94a3b8;
+  font-variant-numeric: tabular-nums;
+}
+
+.throw-time {
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
 .winner-actions {
   display: grid;
   grid-template-columns: 1fr;
