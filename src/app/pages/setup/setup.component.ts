@@ -27,7 +27,7 @@ export class SetupComponent {
   protected playerCount = 2;
   protected names: string[] = ['Vika', 'Tom'];
   protected colorIds: string[] = defaultColorIdsForCount(2);
-  protected variant: GameVariant = 301;
+  protected variant: GameVariant | null = null;
 
   protected onCountChange(event: Event): void {
     const el = event.target as HTMLSelectElement;
@@ -58,7 +58,7 @@ export class SetupComponent {
     this.colorIds[row] = colorId;
   }
 
-  protected start(): void {
+  protected start(variant: GameVariant): void {
     const entries: GameStartEntry[] = [];
     for (let i = 0; i < this.playerCount; i++) {
       entries.push({
@@ -66,8 +66,22 @@ export class SetupComponent {
         colorId: this.colorIds[i] ?? defaultColorIdsForCount(this.playerCount)[i]!,
       });
     }
-    this.game.startGame(entries, this.variant);
+    this.game.startGame(entries, variant);
     void this.router.navigate(['/play']);
+  }
+
+  protected chooseVariantAndStart(variant: GameVariant): void {
+    this.variant = variant;
+
+    if (this.game.hasActiveGame()) {
+      const ok = confirm('Start a new game? This will replace the current game.');
+      if (!ok) {
+        this.variant = null;
+        return;
+      }
+    }
+
+    this.start(variant);
   }
 
   protected resume(): void {

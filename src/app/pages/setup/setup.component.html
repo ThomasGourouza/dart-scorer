@@ -52,15 +52,25 @@
     <span class="label-text">Game variant</span>
     <div class="segmented" role="group" aria-label="Starting score">
       <label>
-        <input type="radio" name="variant" [value]="301" [(ngModel)]="variant" />
+        <input
+          type="radio"
+          name="variant"
+          [value]="301"
+          [checked]="variant === 301"
+          (change)="chooseVariantAndStart(301)"
+        />
         <span>301</span>
       </label>
       <label>
-        <input type="radio" name="variant" [value]="501" [(ngModel)]="variant" />
+        <input
+          type="radio"
+          name="variant"
+          [value]="501"
+          [checked]="variant === 501"
+          (change)="chooseVariantAndStart(501)"
+        />
         <span>501</span>
       </label>
     </div>
   </section>
-
-  <button type="button" class="primary" (click)="start()">Start game</button>
 </div>
