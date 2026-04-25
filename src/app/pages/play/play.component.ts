@@ -20,19 +20,19 @@ export type AnimLayer = 'idle' | 'dart' | 'turn' | 'undo';
   styleUrl: './play.component.css',
 })
 export class PlayComponent implements OnDestroy {
-  protected readonly game = inject(GameStateService);
+  readonly game = inject(GameStateService);
   private readonly router = inject(Router);
 
-  protected readonly dartBases = [
+  readonly dartBases = [
     0,
     ...Array.from({ length: 20 }, (_, i) => i + 1),
     25,
     50,
   ] as const;
 
-  protected readonly selectedBase = signal<number>(0);
-  protected multiplier: Multiplier = 1;
-  protected readonly animState = signal<AnimLayer>('idle');
+  readonly selectedBase = signal<number>(0);
+  multiplier: Multiplier = 1;
+  readonly animState = signal<AnimLayer>('idle');
 
   private animTimerId: ReturnType<typeof setTimeout> | undefined;
 
@@ -42,7 +42,7 @@ export class PlayComponent implements OnDestroy {
     }
   }
 
-  protected panelTheme(): Record<string, string> {
+  panelTheme(): Record<string, string> {
     if (this.game.isFinished()) return {};
     const c = getPlayerColor(this.game.currentPlayer()?.colorId);
     return {
@@ -53,7 +53,7 @@ export class PlayComponent implements OnDestroy {
     };
   }
 
-  protected winnerTheme(): Record<string, string> {
+  winnerTheme(): Record<string, string> {
     const w = this.game.winner();
     if (w === null) return {};
     const c = getPlayerColor(this.game.playersList()[w]?.colorId);
@@ -65,23 +65,21 @@ export class PlayComponent implements OnDestroy {
     };
   }
 
-  protected pickBase(b: number): void {
+  isMultAllowedForBase(base: number, mult: Multiplier): boolean {
+    return GameStateService.allowedMultipliers(base).includes(mult);
+  }
+
+  pickAndSubmitBase(b: number): void {
     if (this.animState() !== 'idle') return;
+
+    const mult = this.multiplier;
+    if (!this.isMultAllowedForBase(b, mult)) return;
+
     this.selectedBase.set(b);
-    this.multiplier = GameStateService.clampMultiplier(b, this.multiplier);
-  }
+    const clamped = GameStateService.clampMultiplier(b, mult);
+    this.multiplier = clamped;
 
-  protected allowedMults(base: number): Multiplier[] {
-    return GameStateService.allowedMultipliers(base);
-  }
-
-  protected isMultAllowed(m: number): boolean {
-    return this.allowedMults(this.selectedBase()).includes(m as Multiplier);
-  }
-
-  protected submit(): void {
-    if (this.animState() !== 'idle') return;
-    const result = this.game.submitAttempt(this.selectedBase(), this.multiplier);
+    const result = this.game.submitAttempt(b, clamped);
     if (result === 'noop') return;
 
     if (result === 'win') {
@@ -113,13 +111,13 @@ export class PlayComponent implements OnDestroy {
     this.multiplier = 1;
   }
 
-  protected winnerName(): string {
+  winnerName(): string {
     const w = this.game.winner();
     if (w === null) return '';
     return this.game.playersList()[w]?.name ?? '';
   }
 
-  protected takeBack(): void {
+  takeBack(): void {
     if (this.animState() !== 'idle' || !this.game.canTakeBack()) return;
     if (this.animTimerId !== undefined) {
       clearTimeout(this.animTimerId);
@@ -138,7 +136,7 @@ export class PlayComponent implements OnDestroy {
     }, UNDO_ANIM_MS);
   }
 
-  protected newGame(): void {
+  newGame(): void {
     if (!this.game.hasActiveGame()) return;
     this.game.abortGame();
     void this.router.navigate(['/']);

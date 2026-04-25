@@ -50,6 +50,24 @@
         </header>
 
         <section class="dart-form" aria-label="Submit dart score">
+          <fieldset class="mult-field">
+            <legend>Multiplier</legend>
+            <div class="segmented">
+              @for (m of [1, 2, 3]; track m) {
+                <label [class.disabled]="animState() !== 'idle'">
+                  <input
+                    type="radio"
+                    name="mult"
+                    [value]="m"
+                    [(ngModel)]="multiplier"
+                    [disabled]="animState() !== 'idle'"
+                  />
+                  <span>×{{ m }}</span>
+                </label>
+              }
+            </div>
+          </fieldset>
+
           <fieldset class="sector-field">
             <legend>Sector</legend>
             <div class="sector-grid" role="group">
@@ -58,8 +76,8 @@
                   type="button"
                   class="sector-cell"
                   [class.sector-cell--selected]="selectedBase() === b"
-                  [disabled]="animState() !== 'idle'"
-                  (click)="pickBase(b)"
+                  [disabled]="animState() !== 'idle' || !isMultAllowedForBase(b, multiplier)"
+                  (click)="pickAndSubmitBase(b)"
                   [attr.aria-pressed]="selectedBase() === b"
                 >
                   <span class="sector-cell__text">
@@ -78,33 +96,7 @@
             </div>
           </fieldset>
 
-          <fieldset class="mult-field">
-            <legend>Multiplier</legend>
-            <div class="segmented">
-              @for (m of [1, 2, 3]; track m) {
-                <label [class.disabled]="!isMultAllowed(m)">
-                  <input
-                    type="radio"
-                    name="mult"
-                    [value]="m"
-                    [(ngModel)]="multiplier"
-                    [disabled]="!isMultAllowed(m) || animState() !== 'idle'"
-                  />
-                  <span>×{{ m }}</span>
-                </label>
-              }
-            </div>
-          </fieldset>
-
           <div class="actions-row">
-            <button
-              type="button"
-              class="primary"
-              (click)="submit()"
-              [disabled]="animState() !== 'idle'"
-            >
-              Submit attempt
-            </button>
             <button
               type="button"
               class="secondary takeback"

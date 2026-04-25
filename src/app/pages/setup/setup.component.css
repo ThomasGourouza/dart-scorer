@@ -13,12 +13,6 @@ h1 {
   font-weight: 650;
 }
 
-.lead {
-  margin: 0 0 24px;
-  color: #b8c0cc;
-  font-size: 0.95rem;
-}
-
 .resume-banner {
   display: flex;
   flex-wrap: wrap;
