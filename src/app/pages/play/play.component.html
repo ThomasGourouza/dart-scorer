@@ -13,10 +13,10 @@
             <div class="anim-rings"></div>
             <div class="anim-bull"></div>
             @if (animState() === 'round') {
-              <p class="anim-caption">Next player</p>
+              <!-- Intentionally no caption during player transition -->
             }
             @if (animState() === 'undo') {
-              <p class="anim-caption anim-caption--undo">Take back</p>
+              <!-- Intentionally no caption during player transition -->
             }
           </div>
         </div>

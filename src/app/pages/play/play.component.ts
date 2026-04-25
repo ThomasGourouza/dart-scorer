@@ -11,7 +11,9 @@ import { EmailHistoryDialogComponent } from './components/email-history-dialog/e
 import { GameHistoryTimelineComponent } from './components/game-history-timeline/game-history-timeline.component';
 import { WinnerCardComponent } from './components/winner-card/winner-card.component';
 
-const DART_ANIM_MS = 420;
+// Short feedback animation between attempts in the same round.
+const DART_ANIM_MS = 200;
+// Longer transition animation when the player changes (new round).
 const ROUND_ANIM_MS = 900;
 const UNDO_ANIM_MS = 400;
 
