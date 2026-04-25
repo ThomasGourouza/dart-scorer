@@ -95,12 +95,6 @@ input[type='text'] {
   margin-bottom: 12px;
 }
 
-.name-label {
-  flex: 0 0 2.5rem;
-  font-size: 0.85rem;
-  color: #94a3b8;
-}
-
 .player-card-head input {
   flex: 1;
 }
