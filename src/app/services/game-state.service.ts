@@ -47,9 +47,11 @@ const VALID_BASES = new Set<number>([
 export const GAME_STORAGE_KEY = 'dart-scorer-game-v1';
 
 interface StoredGameJson {
-  v: 1 | 2 | 3;
+  v: 1 | 2 | 3 | 4;
   past?: GameSnapshot[];
   dartLog?: Array<{ base?: unknown; mult?: unknown }>;
+  startedAtIso?: unknown;
+  history?: unknown;
   players: Array<{ name: string; score: number; colorId?: string }>;
   variant: number;
   currentPlayerIndex: number;
@@ -60,9 +62,11 @@ interface StoredGameJson {
 }
 
 interface PersistedPayload extends StoredGameJson {
-  v: 3;
+  v: 4;
   past: GameSnapshot[];
   dartLog: SubmittedDart[];
+  startedAtIso: string | null;
+  history: GameHistoryRow[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -140,7 +144,10 @@ export class GameStateService {
       localStorage.removeItem(GAME_STORAGE_KEY);
       return;
     }
-    if ((data.v !== 1 && data.v !== 2 && data.v !== 3) || !Array.isArray(data.players)) {
+    if (
+      (data.v !== 1 && data.v !== 2 && data.v !== 3 && data.v !== 4) ||
+      !Array.isArray(data.players)
+    ) {
       localStorage.removeItem(GAME_STORAGE_KEY);
       return;
     }
@@ -190,14 +197,20 @@ export class GameStateService {
       typeof w === 'number' && w >= 0 && w < rows.length ? w : null,
     );
     this.active.set(data.active === true);
+    this.gameStartedAtIso.set(
+      typeof data.startedAtIso === 'string' ? data.startedAtIso : null,
+    );
 
     const pastRaw =
-      (data.v === 2 || data.v === 3) && Array.isArray(data.past) ? data.past : [];
+      (data.v === 2 || data.v === 3 || data.v === 4) && Array.isArray(data.past)
+        ? data.past
+        : [];
     const past = pastRaw
       .map((snap) => this.normalizeSnapshot(snap, rows.length))
       .filter((s): s is GameSnapshot => s !== null);
     this.pastSnapshots.set(past);
     this.dartLog.set(this.parseDartLogForRestore(data.dartLog, past.length));
+    this.historyRows.set(this.parseHistoryForRestore(data.history, rows.length));
   }
 
   startGame(entries: GameStartEntry[], variant: GameVariant): void {
@@ -502,9 +515,11 @@ export class GameStateService {
     const dartLog = this.dartLog().map((d) => ({ base: d.base, mult: d.mult }));
 
     const payload: PersistedPayload = {
-      v: 3,
+      v: 4,
       past,
       dartLog,
+      startedAtIso: this.gameStartedAtIso(),
+      history: this.historyRows(),
       players: this.players().map((p) => ({
         name: p.name,
         score: p.score,
@@ -522,6 +537,63 @@ export class GameStateService {
     } catch {
       /* ignore quota */
     }
+  }
+
+  private parseHistoryForRestore(
+    raw: unknown,
+    playerCount: number,
+  ): GameHistoryRow[] {
+    if (!Array.isArray(raw)) return [];
+    const out: GameHistoryRow[] = [];
+    for (const r of raw) {
+      if (!r || typeof r !== 'object') continue;
+      const o = r as Record<string, unknown>;
+
+      const recordedAtIso = typeof o['recordedAtIso'] === 'string' ? o['recordedAtIso'] : null;
+      const at = new Date(recordedAtIso ?? '');
+      if (!recordedAtIso || !Number.isFinite(at.getTime())) continue;
+
+      const playerIndexRaw = Number(o['playerIndex']);
+      const playerIndex = Number.isFinite(playerIndexRaw) ? Math.floor(playerIndexRaw) : -1;
+      if (playerIndex < 0 || playerIndex >= playerCount) continue;
+
+      const attemptRaw = Number(o['attemptNumber']);
+      const attemptNumber = Number.isFinite(attemptRaw) ? Math.floor(attemptRaw) : -1;
+      if (attemptNumber < 1 || attemptNumber > 3) continue;
+
+      const baseRaw = Number(o['base']);
+      const base = Number.isFinite(baseRaw) ? GameStateService.normalizeBase(baseRaw) : 0;
+
+      const multRaw = Number(o['mult']);
+      const multCoerced = multRaw === 2 || multRaw === 3 ? multRaw : 1;
+      const mult = GameStateService.clampMultiplier(base, multCoerced as Multiplier);
+
+      const deltaRaw = Number(o['delta']);
+      const delta = Number.isFinite(deltaRaw) ? deltaRaw : base === 0 ? 0 : base * mult;
+
+      const scoreBeforeRaw = Number(o['scoreBefore']);
+      const scoreBefore = Number.isFinite(scoreBeforeRaw) ? scoreBeforeRaw : 0;
+
+      const scoreAfterRaw = Number(o['scoreAfter']);
+      const scoreAfter = Number.isFinite(scoreAfterRaw) ? scoreAfterRaw : 0;
+
+      const playerName = typeof o['playerName'] === 'string' ? o['playerName'] : `Player ${playerIndex + 1}`;
+      const gameStartedAtIso = typeof o['gameStartedAtIso'] === 'string' ? o['gameStartedAtIso'] : null;
+
+      out.push({
+        gameStartedAtIso,
+        recordedAtIso,
+        playerIndex,
+        playerName,
+        attemptNumber,
+        base,
+        mult,
+        delta,
+        scoreBefore,
+        scoreAfter,
+      });
+    }
+    return out;
   }
 
   private clearStorage(): void {

@@ -14,7 +14,7 @@ import { WinnerCardComponent } from './components/winner-card/winner-card.compon
 // Short feedback animation between attempts in the same round.
 const DART_ANIM_MS = 200;
 // Longer transition animation when the player changes (new round).
-const ROUND_ANIM_MS = 900;
+const ROUND_ANIM_MS = 500;
 const UNDO_ANIM_MS = 400;
 
 export type AnimLayer = 'idle' | 'dart' | 'round' | 'undo';

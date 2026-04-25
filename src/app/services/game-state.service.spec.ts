@@ -69,6 +69,7 @@ describe('GameStateService', () => {
     expect(svc2.playersList()[0]!.score).toBe(281);
     expect(svc2.attempt()).toBe(2);
     expect(svc2.currentIndex()).toBe(0);
+    expect(svc2.startedAtIso()).toBeTruthy();
   });
 
   it('should clear storage on abort', () => {
@@ -126,5 +127,30 @@ describe('GameStateService', () => {
     expect(svc2.canTakeBack()).toBe(true);
     svc2.takeBack();
     expect(svc2.playersList()[0]!.score).toBe(291);
+  });
+
+  it('should persist and restore game history rows', () => {
+    const svc = TestBed.inject(GameStateService);
+    svc.startGame([...twoPlayers], 301);
+    svc.submitAttempt(20, 1); // A: 281
+    svc.submitAttempt(5, 2); // A: 271
+    svc.submitAttempt(1, 1); // A: 270
+    expect(svc.history().length).toBe(3);
+    const raw = localStorage.getItem(GAME_STORAGE_KEY);
+    expect(raw).toBeTruthy();
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({});
+    const svc2 = TestBed.inject(GameStateService);
+    svc2.restoreFromStorage();
+
+    expect(svc2.hasActiveGame()).toBe(true);
+    expect(svc2.history().length).toBe(3);
+    expect(svc2.history()[0]!.playerName).toBe('A');
+    expect(svc2.history()[0]!.base).toBe(20);
+    expect(svc2.history()[0]!.mult).toBe(1);
+    expect(svc2.history()[0]!.scoreBefore).toBe(301);
+    expect(svc2.history()[0]!.scoreAfter).toBe(281);
+    expect(svc2.history()[2]!.scoreAfter).toBe(270);
   });
 });
