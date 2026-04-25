@@ -26,14 +26,13 @@
         <div class="winner" role="status">
           <h2>Congratulations!</h2>
           <p class="winner-name">{{ winnerName() }} wins.</p>
-          <p class="hint">Use <strong>New game</strong> in the top bar to start a new game.</p>
           <button
             type="button"
             class="secondary takeback"
-            (click)="takeBack()"
-            [disabled]="!game.canTakeBack() || animState() !== 'idle'"
+            (click)="newGame()"
+            [disabled]="animState() !== 'idle'"
           >
-            Take back
+            New game
           </button>
         </div>
       } @else {

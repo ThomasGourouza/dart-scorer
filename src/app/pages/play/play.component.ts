@@ -1,6 +1,7 @@
 import { NgStyle } from '@angular/common';
 import { Component, OnDestroy, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { GameStateService, Multiplier, SubmitResult } from '../../services/game-state.service';
 import { ScoreboardComponent } from '../../components/scoreboard/scoreboard.component';
 import { getPlayerColor } from '../../theme/player-colors';
@@ -20,6 +21,7 @@ export type AnimLayer = 'idle' | 'dart' | 'turn' | 'undo';
 })
 export class PlayComponent implements OnDestroy {
   protected readonly game = inject(GameStateService);
+  private readonly router = inject(Router);
 
   protected readonly dartBases = [
     0,
@@ -134,5 +136,11 @@ export class PlayComponent implements OnDestroy {
       this.animState.set('idle');
       this.animTimerId = undefined;
     }, UNDO_ANIM_MS);
+  }
+
+  protected newGame(): void {
+    if (!this.game.hasActiveGame()) return;
+    this.game.abortGame();
+    void this.router.navigate(['/']);
   }
 }
