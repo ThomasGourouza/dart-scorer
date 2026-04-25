@@ -1,0 +1,57 @@
+.winner {
+  text-align: center;
+  padding: 12px 8px 8px;
+}
+
+.winner h2 {
+  margin: 0 0 8px;
+  font-size: 1.75rem;
+  font-weight: 750;
+  color: var(--p-accent, #e8eaed);
+}
+
+.winner-name {
+  margin: 0 0 16px;
+  font-size: 1.15rem;
+  color: #cbd5e1;
+}
+
+.winner-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  max-width: 320px;
+  margin: 0 auto 14px;
+}
+
+@media (min-width: 420px) {
+  .winner-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.secondary {
+  width: 100%;
+  min-height: 52px;
+  font: inherit;
+  font-weight: 600;
+  font-size: 1rem;
+  border-radius: 12px;
+  border: 1px solid #4b5c72;
+  background: #1a222c;
+  color: #e2e8f0;
+  cursor: pointer;
+}
+
+.secondary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.takeback {
+  margin-top: 18px;
+  max-width: 280px;
+  margin-left: auto;
+  margin-right: auto;
+}
+

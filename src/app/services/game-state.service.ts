@@ -1,5 +1,7 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { defaultColorIdsForCount, isKnownPlayerColorId } from '../theme/player-colors';
+import { buildGameHistoryCsv } from './history/game-history-csv';
+import type { GameHistoryRow } from './history/game-history.model';
 
 export type GameVariant = 301 | 501;
 export type Multiplier = 1 | 2 | 3;
@@ -9,19 +11,6 @@ export type SubmitResult = 'noop' | 'next_attempt' | 'next_player' | 'bust' | 'w
 export interface SubmittedDart {
   base: number;
   mult: Multiplier;
-}
-
-export interface GameHistoryRow {
-  gameStartedAtIso: string | null;
-  recordedAtIso: string;
-  playerIndex: number;
-  playerName: string;
-  attemptNumber: number;
-  base: number;
-  mult: Multiplier;
-  delta: number;
-  scoreBefore: number;
-  scoreAfter: number;
 }
 
 export interface PlayerRow {
@@ -369,67 +358,14 @@ export class GameStateService {
   }
 
   getHistoryCsv(): string {
-    const started = this.gameStartedAtIso();
     const winnerIdx = this.winnerIndex();
     const winnerName =
       winnerIdx !== null ? (this.players()[winnerIdx]?.name ?? '') : '';
-    const header = [
-      'game_started_at',
-      'recorded_at',
-      'player_index',
-      'player_name',
-      'turn',
-      'attempt',
-      'base',
-      'multiplier',
-      'delta',
-      'score_before',
-      'score_after',
-      'winner_name',
-    ].join(',');
-
-    let turn = 0;
-    const rows = this.historyRows().map((r) => {
-      if (r.attemptNumber === 1) turn += 1;
-      return [
-        GameStateService.csvCell(GameStateService.formatIsoForCsv(started)),
-        GameStateService.csvCell(GameStateService.formatIsoForCsv(r.recordedAtIso)),
-        String(r.playerIndex + 1),
-        GameStateService.csvCell(r.playerName),
-        String(turn),
-        String(r.attemptNumber),
-        String(r.base),
-        String(r.mult),
-        String(r.delta),
-        String(r.scoreBefore),
-        String(r.scoreAfter),
-        GameStateService.csvCell(winnerName),
-      ].join(',');
+    return buildGameHistoryCsv({
+      gameStartedAtIso: this.gameStartedAtIso(),
+      rows: this.historyRows(),
+      winnerName,
     });
-
-    return [header, ...rows].join('\n') + '\n';
-  }
-
-  private static formatIsoForCsv(iso: string | null): string {
-    if (!iso) return '';
-    const d = new Date(iso);
-    if (!Number.isFinite(d.getTime())) return '';
-    const pad2 = (n: number) => String(n).padStart(2, '0');
-    const dd = pad2(d.getDate());
-    const mm = pad2(d.getMonth() + 1);
-    const yyyy = String(d.getFullYear());
-    const hh = pad2(d.getHours());
-    const min = pad2(d.getMinutes());
-    const ss = pad2(d.getSeconds());
-    return `${dd}/${mm}/${yyyy} - ${hh}:${min}:${ss}`;
-  }
-
-  private static csvCell(v: string): string {
-    if (v.includes('"')) v = v.replaceAll('"', '""');
-    if (v.includes(',') || v.includes('\n') || v.includes('\r') || v.includes('"')) {
-      return `"${v}"`;
-    }
-    return v;
   }
 
   private pushHistoryRow(

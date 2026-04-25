@@ -1,0 +1,43 @@
+<section class="history" aria-label="Game history">
+  <h3>History</h3>
+  @if (turns.length === 0) {
+    <p class="history-empty">No throws recorded.</p>
+  } @else {
+    <div class="turn-list">
+      @for (t of turns; track t.round + '-' + t.playerIndex) {
+        <article class="turn-card" [style.--turn-accent]="accentForTurn(t)">
+          <header class="turn-card__head">
+            <div class="turn-card__title">
+              <span class="turn-pill">Round {{ t.round }}</span>
+              <span class="turn-player">{{ t.playerName }}</span>
+            </div>
+            <span class="turn-meta">{{ t.throws.length }} dart(s)</span>
+          </header>
+
+          <ol class="throw-list">
+            @for (th of t.throws; track th.idxInTurn) {
+              <li class="throw-row">
+                <span class="throw-num">{{ th.idxInTurn }}</span>
+                <span class="throw-main">
+                  <span class="throw-hit">
+                    @if (th.base === 0) {
+                      Miss
+                    } @else {
+                      {{ th.base }} ×{{ th.mult }}
+                    }
+                  </span>
+                  <span class="throw-sub">
+                    {{ th.scoreBefore }} → {{ th.scoreAfter }}
+                    <span class="throw-delta">(-{{ th.delta }})</span>
+                    <span class="throw-time">{{ formatIsoUi(th.atIso) }}</span>
+                  </span>
+                </span>
+              </li>
+            }
+          </ol>
+        </article>
+      }
+    </div>
+  }
+</section>
+

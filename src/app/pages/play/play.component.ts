@@ -1,10 +1,15 @@
 import { NgStyle } from '@angular/common';
-import { Component, OnDestroy, effect, inject, signal } from '@angular/core';
+import { Component, OnDestroy, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { GameHistoryRow, GameStateService, Multiplier, SubmitResult } from '../../services/game-state.service';
+import { GameStateService, Multiplier, SubmitResult } from '../../services/game-state.service';
 import { ScoreboardComponent } from '../../components/scoreboard/scoreboard.component';
 import { getPlayerColor } from '../../theme/player-colors';
+import { groupHistoryByTurn } from '../../services/history/game-history-grouping';
+import type { GameHistoryTurn } from '../../services/history/game-history.model';
+import { EmailHistoryDialogComponent } from './components/email-history-dialog/email-history-dialog.component';
+import { GameHistoryTimelineComponent } from './components/game-history-timeline/game-history-timeline.component';
+import { WinnerCardComponent } from './components/winner-card/winner-card.component';
 
 const DART_ANIM_MS = 420;
 const TURN_ANIM_MS = 900;
@@ -15,7 +20,14 @@ export type AnimLayer = 'idle' | 'dart' | 'turn' | 'undo';
 @Component({
   selector: 'app-play',
   standalone: true,
-  imports: [FormsModule, NgStyle, ScoreboardComponent],
+  imports: [
+    FormsModule,
+    NgStyle,
+    ScoreboardComponent,
+    WinnerCardComponent,
+    EmailHistoryDialogComponent,
+    GameHistoryTimelineComponent,
+  ],
   templateUrl: './play.component.html',
   styleUrl: './play.component.css',
 })
@@ -34,20 +46,9 @@ export class PlayComponent implements OnDestroy {
   multiplier: Multiplier = 1;
   readonly animState = signal<AnimLayer>('idle');
   readonly emailDialogOpen = signal(false);
-  emailTo = '';
-  readonly historyTurns = signal<Array<{
-    turn: number;
-    playerName: string;
-    throws: Array<{
-      idxInTurn: number;
-      base: number;
-      mult: Multiplier;
-      delta: number;
-      scoreBefore: number;
-      scoreAfter: number;
-      atIso: string;
-    }>;
-  }>>([]);
+  readonly historyTurns = computed<GameHistoryTurn[]>(() =>
+    groupHistoryByTurn(this.game.history()),
+  );
 
   private animTimerId: ReturnType<typeof setTimeout> | undefined;
 
@@ -62,42 +63,6 @@ export class PlayComponent implements OnDestroy {
     if (!Number.isFinite(d.getTime())) return iso;
     const pad2 = (n: number) => String(n).padStart(2, '0');
     return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} - ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
-  }
-
-  private rebuildHistoryTurns(rows: readonly GameHistoryRow[]): void {
-    const turns: Array<{
-      turn: number;
-      playerName: string;
-      throws: Array<{
-        idxInTurn: number;
-        base: number;
-        mult: Multiplier;
-        delta: number;
-        scoreBefore: number;
-        scoreAfter: number;
-        atIso: string;
-      }>;
-    }> = [];
-
-    let turnNo = 0;
-    for (const r of rows) {
-      if (r.attemptNumber === 1 || turns.length === 0) {
-        turnNo += 1;
-        turns.push({ turn: turnNo, playerName: r.playerName, throws: [] });
-      }
-      const t = turns[turns.length - 1]!;
-      t.throws.push({
-        idxInTurn: r.attemptNumber,
-        base: r.base,
-        mult: r.mult,
-        delta: r.delta,
-        scoreBefore: r.scoreBefore,
-        scoreAfter: r.scoreAfter,
-        atIso: r.recordedAtIso,
-      });
-    }
-
-    this.historyTurns.set(turns);
   }
 
   panelTheme(): Record<string, string> {
@@ -216,7 +181,6 @@ export class PlayComponent implements OnDestroy {
   }
 
   openEmailDialog(): void {
-    this.emailTo = '';
     this.emailDialogOpen.set(true);
   }
 
@@ -224,10 +188,7 @@ export class PlayComponent implements OnDestroy {
     this.emailDialogOpen.set(false);
   }
 
-  sendEmailHistory(): void {
-    const to = this.emailTo.trim();
-    if (to.length === 0) return;
-
+  sendEmailHistory(to: string): void {
     const csv = this.game.getHistoryCsv();
     const subject = 'Dart scorer - game history (CSV)';
     const body = `Hi,\n\nHere is the game history CSV:\n\n${csv}`;
@@ -236,9 +197,5 @@ export class PlayComponent implements OnDestroy {
     this.emailDialogOpen.set(false);
   }
 
-  constructor() {
-    effect(() => {
-      this.rebuildHistoryTurns(this.game.history());
-    });
-  }
+  // no-op constructor
 }

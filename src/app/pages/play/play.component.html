@@ -23,99 +23,21 @@
       }
 
       @if (game.isFinished()) {
-        <div class="winner" role="status">
-          <h2>Congratulations!</h2>
-          <p class="winner-name">{{ winnerName() }} wins.</p>
-          <div class="winner-actions">
-            <button
-              type="button"
-              class="secondary"
-              (click)="downloadHistory()"
-              [disabled]="animState() !== 'idle'"
-            >
-              Download history
-            </button>
-            <button
-              type="button"
-              class="secondary"
-              (click)="openEmailDialog()"
-              [disabled]="animState() !== 'idle'"
-            >
-              Email history
-            </button>
-          </div>
-          <button
-            type="button"
-            class="secondary takeback"
-            (click)="newGame()"
-            [disabled]="animState() !== 'idle'"
-          >
-            New game
-          </button>
-        </div>
-        <section class="history" aria-label="Game history">
-          <h3>History</h3>
-          @if (historyTurns().length === 0) {
-            <p class="history-empty">No throws recorded.</p>
-          } @else {
-            <div class="turn-list">
-              @for (t of historyTurns(); track t.turn) {
-                <article class="turn-card">
-                  <header class="turn-card__head">
-                    <div class="turn-card__title">
-                      <span class="turn-pill">Turn {{ t.turn }}</span>
-                      <span class="turn-player">{{ t.playerName }}</span>
-                    </div>
-                    <span class="turn-meta">{{ t.throws.length }} dart(s)</span>
-                  </header>
+        <app-winner-card
+          [winnerName]="winnerName()"
+          [disabled]="animState() !== 'idle'"
+          (downloadHistory)="downloadHistory()"
+          (emailHistory)="openEmailDialog()"
+          (newGame)="newGame()"
+        />
 
-                  <ol class="throw-list">
-                    @for (th of t.throws; track th.idxInTurn) {
-                      <li class="throw-row">
-                        <span class="throw-num">{{ th.idxInTurn }}</span>
-                        <span class="throw-main">
-                          <span class="throw-hit">
-                            @if (th.base === 0) {
-                              Miss
-                            } @else {
-                              {{ th.base }} ×{{ th.mult }}
-                            }
-                          </span>
-                          <span class="throw-sub">
-                            {{ th.scoreBefore }} → {{ th.scoreAfter }}
-                            <span class="throw-delta">(-{{ th.delta }})</span>
-                            <span class="throw-time">{{ formatIsoUi(th.atIso) }}</span>
-                          </span>
-                        </span>
-                      </li>
-                    }
-                  </ol>
-                </article>
-              }
-            </div>
-          }
-        </section>
-        @if (emailDialogOpen()) {
-          <div class="dialog-backdrop" role="presentation" (click)="closeEmailDialog()"></div>
-          <div class="dialog" role="dialog" aria-modal="true" aria-label="Email history">
-            <h3>Email history</h3>
-            <label class="dialog-label">
-              <span>Email address</span>
-              <input
-                type="email"
-                [(ngModel)]="emailTo"
-                autocomplete="email"
-                placeholder="name@example.com"
-              />
-            </label>
-            <div class="dialog-actions">
-              <button type="button" class="secondary" (click)="closeEmailDialog()">Cancel</button>
-              <button type="button" class="primary" (click)="sendEmailHistory()" [disabled]="emailTo.trim().length === 0">
-                Open email
-              </button>
-            </div>
-          </div>
-        }
+        <app-game-history-timeline [turns]="historyTurns()" [players]="game.playersList()" />
+
+        <app-email-history-dialog
+          [open]="emailDialogOpen()"
+          (close)="closeEmailDialog()"
+          (submitEmail)="sendEmailHistory($event)"
+        />
       } @else {
         <header class="turn-header">
           <div class="turn-header__main">
