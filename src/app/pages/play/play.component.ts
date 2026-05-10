@@ -10,6 +10,7 @@ import type { GameHistoryTurn } from '../../services/history/game-history.model'
 import { EmailHistoryDialogComponent } from './components/email-history-dialog/email-history-dialog.component';
 import { GameHistoryTimelineComponent } from './components/game-history-timeline/game-history-timeline.component';
 import { WinnerCardComponent } from './components/winner-card/winner-card.component';
+import { GameApiService } from '../../services/game-api.service';
 
 // Short feedback animation between attempts in the same round.
 const DART_ANIM_MS = 200;
@@ -36,6 +37,7 @@ export type AnimLayer = 'idle' | 'dart' | 'round' | 'undo';
 export class PlayComponent implements OnDestroy {
   readonly game = inject(GameStateService);
   private readonly router = inject(Router);
+  private readonly gameApi = inject(GameApiService);
 
   readonly dartBases = [
     0,
@@ -53,6 +55,7 @@ export class PlayComponent implements OnDestroy {
   );
 
   private animTimerId: ReturnType<typeof setTimeout> | undefined;
+  private gameSavedToBackend = false;
 
   ngOnDestroy(): void {
     if (this.animTimerId !== undefined) {
@@ -108,6 +111,7 @@ export class PlayComponent implements OnDestroy {
     if (result === 'noop') return;
 
     if (result === 'win') {
+      this.saveCompletedGame();
       this.resetDartUi();
       return;
     }
@@ -164,6 +168,7 @@ export class PlayComponent implements OnDestroy {
   newGame(): void {
     if (!this.game.hasActiveGame()) return;
     this.game.abortGame();
+    this.gameSavedToBackend = false;
     void this.router.navigate(['/']);
   }
 
@@ -197,6 +202,29 @@ export class PlayComponent implements OnDestroy {
     const mailto = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.location.href = mailto;
     this.emailDialogOpen.set(false);
+  }
+
+  private saveCompletedGame(): void {
+    if (this.gameSavedToBackend) return;
+    if (!this.game.isFinished()) return;
+    const winnerIndex = this.game.winner();
+    if (winnerIndex === null) return;
+
+    this.gameApi
+      .saveCompletedGame({
+        startedAtIso: this.game.startedAtIso(),
+        players: this.game.playersList(),
+        winnerIndex,
+        historyRows: this.game.history(),
+      })
+      .subscribe({
+        next: () => {
+          this.gameSavedToBackend = true;
+        },
+        error: (err: unknown) => {
+          console.error('Failed to persist game in backend', err);
+        },
+      });
   }
 
   // no-op constructor
