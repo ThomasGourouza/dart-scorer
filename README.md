@@ -1,59 +1,31 @@
-# DartScorer
+# Dart Scorer Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.15.
+Angular frontend for Dart Scorer.
 
-## Development server
-
-To start a local development server, run:
+## Local dev without Docker
 
 ```bash
-ng serve
+npm install
+npm start
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Docker image
 
-## Code scaffolding
+The project includes a production Docker image (`Dockerfile`) served by Nginx.
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Runtime API URL is injected via environment variable:
 
-```bash
-ng generate component component-name
-```
+- `API_BASE_URL` -> written to `assets/runtime-config.js` at container startup.
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Render deployment
 
-```bash
-ng generate --help
-```
+This repo contains `render.yaml` for Docker deployment.
+Set:
 
-## Building
+- `API_BASE_URL=https://<your-backend-service>.onrender.com`
 
-To build the project run:
+## Fullstack docs
 
-```bash
-ng build
-```
+For the two official operation modes (Production Render+Neon and Local one-command Docker), use the shared infra repo tutorial:
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- `../dart-scorer-infra/README.md`

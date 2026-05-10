@@ -40,10 +40,18 @@ interface CreateGameResponse {
   gameId: string;
 }
 
+interface RuntimeConfig {
+  apiBaseUrl?: string;
+}
+
+interface RuntimeWindow extends Window {
+  __dartScorerConfig?: RuntimeConfig;
+}
+
 @Injectable({ providedIn: 'root' })
 export class GameApiService {
   private readonly http = inject(HttpClient);
-  private readonly apiBaseUrl = environment.apiBaseUrl.replace(/\/+$/, '');
+  private readonly apiBaseUrl = this.resolveApiBaseUrl();
 
   saveCompletedGame(args: {
     startedAtIso: string | null;
@@ -98,5 +106,10 @@ export class GameApiService {
     }
 
     return rounds;
+  }
+
+  private resolveApiBaseUrl(): string {
+    const runtime = (window as RuntimeWindow).__dartScorerConfig?.apiBaseUrl;
+    return (runtime ?? environment.apiBaseUrl).replace(/\/+$/, '');
   }
 }
