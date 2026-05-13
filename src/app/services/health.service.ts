@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subscription, catchError, of, switchMap, timeout, timer } from 'rxjs';
@@ -23,7 +23,7 @@ const PROBE_TIMEOUT_MS = 5_000;
 const POLL_INTERVAL_READY_MS = 60_000;
 const POLL_INTERVAL_WAKING_MS = 3_000;
 const POLL_INTERVAL_DOWN_MS = 15_000;
-const WAKING_DEADLINE_MS = 90_000;
+const WAKING_DEADLINE_MS = 45_000;
 
 @Injectable({ providedIn: 'root' })
 export class HealthService {
@@ -84,7 +84,17 @@ export class HealthService {
           if (apiUp && dbUp) return of<HealthStatus>('ready');
           return of<HealthStatus>('down');
         }),
-        catchError(() => {
+        catchError((err: unknown) => {
+          if (err instanceof HttpErrorResponse && err.status >= 400 && err.status < 600) {
+            const body = err.error as HealthResponse | null | undefined;
+            const status = (body?.status ?? '').toUpperCase();
+            if (status === 'DOWN' || status === 'OUT_OF_SERVICE') {
+              const dbStatus = (body?.components?.['db']?.status ?? '').toUpperCase();
+              this.apiUpSignal.set(true);
+              this.dbUpSignal.set(dbStatus === 'UP');
+              return of<HealthStatus>('down');
+            }
+          }
           this.apiUpSignal.set(false);
           this.dbUpSignal.set(false);
           return of<HealthStatus>('waking');

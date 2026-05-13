@@ -42,11 +42,17 @@
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  border: 1px solid #2a3441;
-  background: #151c24;
-  color: #e8eaed;
+  border: 1px solid var(--outline-border);
+  background: transparent;
+  color: var(--outline-fg);
   cursor: pointer;
   padding: 0;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.menu-btn:hover {
+  background: var(--outline-hover-bg);
+  border-color: var(--accent);
 }
 
 .menu-bar {
@@ -73,14 +79,9 @@
 .brand-mark {
   width: 28px;
   height: 28px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  object-fit: contain;
   border-radius: 8px;
-  background: linear-gradient(135deg, #38bdf8, #a78bfa);
-  color: #0f1419;
-  font-weight: 900;
-  font-size: 0.95rem;
+  display: block;
 }
 
 .topbar__status {
@@ -165,12 +166,8 @@
 }
 
 .nav-link--active {
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, #38bdf8 24%, transparent),
-    color-mix(in srgb, #a78bfa 18%, transparent)
-  );
-  border-color: color-mix(in srgb, #a78bfa 35%, transparent);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  border-color: var(--accent);
   color: #f8fafc;
 }
 
@@ -223,9 +220,16 @@
   text-decoration: none;
   padding: 12px 14px;
   border-radius: 12px;
-  background: linear-gradient(180deg, #38bdf8, #2563eb);
-  color: #0b1220;
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
   font-weight: 700;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.nav-cta:hover {
+  background: var(--outline-accent-hover-bg);
+  color: var(--accent-strong);
 }
 
 .scrim {
@@ -269,9 +273,11 @@
   }
 
   .sidenav {
-    position: sticky;
+    position: fixed;
     top: 0;
-    inset: auto;
+    left: 0;
+    bottom: 0;
+    right: auto;
     grid-area: side;
     transform: none;
     border-right: 1px solid #1d2731;

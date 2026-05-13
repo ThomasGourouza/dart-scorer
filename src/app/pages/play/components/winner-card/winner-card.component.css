@@ -37,10 +37,16 @@
   font-weight: 600;
   font-size: 1rem;
   border-radius: 12px;
-  border: 1px solid #4b5c72;
-  background: #1a222c;
-  color: #e2e8f0;
+  border: 1px solid var(--outline-border);
+  background: transparent;
+  color: var(--outline-fg);
   cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.secondary:hover:not(:disabled) {
+  background: var(--outline-hover-bg);
+  border-color: var(--accent);
 }
 
 .secondary:disabled {

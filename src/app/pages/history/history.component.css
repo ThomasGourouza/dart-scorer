@@ -140,15 +140,21 @@
   min-height: 40px;
   padding: 0 14px;
   border-radius: 10px;
-  border: 1px solid #3d4a5c;
-  background: #151c24;
-  color: #e2e8f0;
+  border: 1px solid var(--outline-border);
+  background: transparent;
+  color: var(--outline-fg);
   cursor: pointer;
   font-weight: 600;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--outline-hover-bg);
+  border-color: var(--accent);
 }
 
 .btn:disabled {
@@ -157,9 +163,14 @@
 }
 
 .btn--primary {
-  background: linear-gradient(180deg, #38bdf8, #2563eb);
-  color: #0b1220;
-  border-color: transparent;
+  background: transparent;
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: var(--outline-accent-hover-bg);
+  color: var(--accent-strong);
 }
 
 .status {

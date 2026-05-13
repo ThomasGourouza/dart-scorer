@@ -37,11 +37,17 @@ h1 {
   min-height: 44px;
   padding: 0 18px;
   border-radius: 10px;
-  border: 1px solid #5b8cff;
-  background: color-mix(in srgb, #5b8cff 16%, transparent);
-  color: #dbeafe;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
   cursor: pointer;
   font-weight: 600;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.resume:hover {
+  background: var(--outline-accent-hover-bg);
+  color: var(--accent-strong);
 }
 
 h2 {
