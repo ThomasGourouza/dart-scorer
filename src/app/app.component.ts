@@ -3,6 +3,8 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } fro
 import { filter, Subscription } from 'rxjs';
 import { GameStateService } from './services/game-state.service';
 import { ScreenWakeLockService } from './services/screen-wake-lock.service';
+import { HealthService } from './services/health.service';
+import { StatusPillComponent } from './components/status-pill/status-pill.component';
 
 interface NavItem {
   readonly path: string;
@@ -12,7 +14,7 @@ interface NavItem {
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, StatusPillComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
@@ -21,6 +23,7 @@ export class AppComponent implements OnDestroy {
   protected readonly game = inject(GameStateService);
   private readonly router = inject(Router);
   private readonly wakeLock = inject(ScreenWakeLockService);
+  private readonly health = inject(HealthService);
 
   protected readonly drawerOpen = signal(false);
   protected readonly navItems: readonly NavItem[] = [
@@ -37,6 +40,7 @@ export class AppComponent implements OnDestroy {
 
   constructor() {
     this.wakeLock.startManaging();
+    this.health.start();
     this.navSub = this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe(() => this.drawerOpen.set(false));

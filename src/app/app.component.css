@@ -83,6 +83,12 @@
   font-size: 0.95rem;
 }
 
+.topbar__status {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
 .abort {
   font: inherit;
   min-height: 44px;
