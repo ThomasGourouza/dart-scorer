@@ -1,0 +1,86 @@
+<section class="game-detail">
+  <div class="back-row">
+    <a routerLink="/history" class="back-link">&larr; Back to history</a>
+  </div>
+
+  @if (state() === 'loading') {
+    <div class="skeleton-card" aria-hidden="true"></div>
+  } @else if (state() === 'error') {
+    <div class="status status--error">
+      <p>{{ errorMsg() ?? 'Failed to load game.' }}</p>
+      <button type="button" class="btn" (click)="retry()">Retry</button>
+    </div>
+  } @else if (game()) {
+    <header class="detail-head">
+      <div>
+        <h1>Game recap</h1>
+        <p class="muted">
+          {{ formatDate(game()!.dateTime) }}
+          <span aria-hidden="true">·</span>
+          {{ formatDuration(game()!.durationSeconds) }}
+          <span aria-hidden="true">·</span>
+          {{ totalThrows() }} throws
+        </p>
+      </div>
+      @if (winner()) {
+        <span
+          class="winner-pill"
+          [style.--chip-color]="playerColor(winner()!)"
+        >
+          <span class="winner-pill__dot" aria-hidden="true"></span>
+          Winner: <strong>{{ winner()!.playerName }}</strong>
+        </span>
+      }
+    </header>
+
+    <section class="players-strip" aria-label="Players">
+      @for (p of game()!.players; track p.playerIndex) {
+        <span
+          class="player-chip"
+          [class.player-chip--winner]="p.winner === true"
+          [style.--chip-color]="playerColor(p)"
+        >
+          <span class="player-chip__dot" aria-hidden="true"></span>
+          <span class="player-chip__name">{{ p.playerName }}</span>
+        </span>
+      }
+    </section>
+
+    <section class="rounds" aria-label="Rounds">
+      @for (r of game()!.rounds; track r.roundNumber + '-' + r.playerIndex) {
+        <article class="round-card" [style.--round-accent]="roundAccent(r)">
+          <header class="round-card__head">
+            <div class="round-card__title">
+              <span class="round-pill">Round {{ r.roundNumber }}</span>
+              <span class="round-player">{{ r.playerName }}</span>
+            </div>
+            <span class="round-meta">
+              {{ r.scoreBefore }} <span aria-hidden="true">→</span> {{ r.scoreAfter }}
+            </span>
+          </header>
+
+          <ol class="throw-list">
+            @for (th of r.throws; track th.throwNumber) {
+              <li class="throw-row">
+                <span class="throw-num">{{ th.throwNumber }}</span>
+                <span class="throw-main">
+                  <span class="throw-hit">
+                    @if (th.base === 0) {
+                      Miss
+                    } @else {
+                      {{ th.base }} ×{{ th.multiplier }}
+                    }
+                  </span>
+                  <span class="throw-sub">
+                    {{ th.scoreBefore }} <span aria-hidden="true">→</span> {{ th.scoreAfter }}
+                    <span class="throw-delta">(-{{ th.delta }})</span>
+                  </span>
+                </span>
+              </li>
+            }
+          </ol>
+        </article>
+      }
+    </section>
+  }
+</section>

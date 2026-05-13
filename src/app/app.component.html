@@ -1,9 +1,71 @@
-<header class="topbar">
-  <a routerLink="/" class="brand">{{ title }}</a>
-  <button type="button" class="abort" (click)="abort()" [disabled]="!game.hasActiveGame()">
-    {{ game.isFinished() ? 'New game' : 'Abort game' }}
-  </button>
-</header>
-<main class="shell">
-  <router-outlet />
-</main>
+<div class="layout" [class.layout--drawer-open]="drawerOpen()">
+  <header class="topbar">
+    <button
+      type="button"
+      class="menu-btn"
+      (click)="toggleDrawer()"
+      [attr.aria-expanded]="drawerOpen()"
+      aria-controls="primary-nav"
+      aria-label="Toggle navigation"
+    >
+      <span class="menu-bar"></span>
+      <span class="menu-bar"></span>
+      <span class="menu-bar"></span>
+    </button>
+
+    <a [routerLink]="playUrl()" class="brand">
+      <span class="brand-mark" aria-hidden="true">D</span>
+      <span class="brand-text">{{ title }}</span>
+    </a>
+
+    <button
+      type="button"
+      class="abort"
+      (click)="abort()"
+      [disabled]="!game.hasActiveGame()"
+    >
+      {{ game.isFinished() ? 'New game' : 'Abort game' }}
+    </button>
+  </header>
+
+  <aside
+    id="primary-nav"
+    class="sidenav"
+    [class.sidenav--open]="drawerOpen()"
+    aria-label="Primary navigation"
+  >
+    <nav class="sidenav__inner">
+      <ul class="nav-list">
+        @for (item of navItems; track item.path) {
+          <li>
+            <a
+              [routerLink]="item.path"
+              routerLinkActive="nav-link--active"
+              [routerLinkActiveOptions]="{ exact: false }"
+              class="nav-link"
+            >
+              <span class="nav-icon" [attr.data-icon]="item.icon" aria-hidden="true"></span>
+              <span class="nav-label">{{ item.label }}</span>
+            </a>
+          </li>
+        }
+      </ul>
+    </nav>
+
+    <div class="sidenav__foot">
+      <a routerLink="/" class="nav-cta">New game</a>
+    </div>
+  </aside>
+
+  <button
+    type="button"
+    class="scrim"
+    aria-label="Close navigation"
+    (click)="closeDrawer()"
+    [hidden]="!drawerOpen()"
+  ></button>
+
+  <main class="shell">
+    <router-outlet />
+  </main>
+</div>

@@ -24,6 +24,22 @@ Set:
 
 - `API_BASE_URL=https://<your-backend-service>.onrender.com`
 
+## App structure
+
+Sidebar tabs:
+
+- **Play** — current live game flow.
+- **History** — paginated list of saved games, with click-through to a per-game timeline.
+- **Stats** — player-name based analytics across all games, with optional filters (date range, variant).
+
+## Suggested future features
+
+- Head-to-head rivalry view (per pair of player names).
+- Milestones/achievements (best checkout, highest single dart, win streaks).
+- Shareable game recap link / image.
+- Season mode (date-bounded leaderboard).
+- Data export of History and Stats as CSV/JSON.
+
 ## Fullstack docs
 
 For the two official operation modes (Production Render+Neon and Local one-command Docker), use the shared infra repo tutorial:

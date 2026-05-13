@@ -1,11 +1,18 @@
-import { Component, OnDestroy, inject } from '@angular/core';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { Component, OnDestroy, computed, inject, signal } from '@angular/core';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { filter, Subscription } from 'rxjs';
 import { GameStateService } from './services/game-state.service';
 import { ScreenWakeLockService } from './services/screen-wake-lock.service';
 
+interface NavItem {
+  readonly path: string;
+  readonly label: string;
+  readonly icon: string;
+}
+
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
@@ -15,12 +22,37 @@ export class AppComponent implements OnDestroy {
   private readonly router = inject(Router);
   private readonly wakeLock = inject(ScreenWakeLockService);
 
+  protected readonly drawerOpen = signal(false);
+  protected readonly navItems: readonly NavItem[] = [
+    { path: '/play', label: 'Play', icon: 'play' },
+    { path: '/history', label: 'History', icon: 'history' },
+    { path: '/stats', label: 'Stats', icon: 'stats' },
+  ];
+
+  protected readonly playUrl = computed(() =>
+    this.game.hasActiveGame() ? '/play' : '/',
+  );
+
+  private readonly navSub: Subscription;
+
   constructor() {
     this.wakeLock.startManaging();
+    this.navSub = this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe(() => this.drawerOpen.set(false));
   }
 
   ngOnDestroy(): void {
     this.wakeLock.stopManaging();
+    this.navSub.unsubscribe();
+  }
+
+  protected toggleDrawer(): void {
+    this.drawerOpen.update((open) => !open);
+  }
+
+  protected closeDrawer(): void {
+    this.drawerOpen.set(false);
   }
 
   protected abort(): void {

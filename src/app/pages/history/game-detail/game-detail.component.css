@@ -1,0 +1,249 @@
+:host {
+  display: block;
+}
+
+.game-detail {
+  display: grid;
+  gap: 18px;
+}
+
+.back-row {
+  margin-bottom: -4px;
+}
+
+.back-link {
+  color: #94a3b8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.back-link:hover {
+  color: #e2e8f0;
+}
+
+.detail-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 18px;
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px solid #2a3441;
+  background: #151c24;
+}
+
+.detail-head h1 {
+  margin: 0 0 4px;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.muted {
+  margin: 0;
+  color: #94a3b8;
+}
+
+.winner-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--chip-color, #5b8cff) 60%, #2f3c4d);
+  background: color-mix(in srgb, var(--chip-color, #5b8cff) 22%, #0f1419);
+  color: #f8fafc;
+  font-weight: 700;
+}
+
+.winner-pill__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--chip-color, #5b8cff);
+}
+
+.players-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.player-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--chip-color, #5b8cff) 35%, #2f3c4d);
+  background: color-mix(in srgb, var(--chip-color, #5b8cff) 10%, #0f1419);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.player-chip--winner {
+  border-color: color-mix(in srgb, var(--chip-color, #5b8cff) 65%, #2f3c4d);
+  background: color-mix(in srgb, var(--chip-color, #5b8cff) 22%, #0f1419);
+}
+
+.player-chip__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--chip-color, #5b8cff);
+}
+
+.rounds {
+  display: grid;
+  gap: 10px;
+}
+
+.round-card {
+  border: 1px solid color-mix(in srgb, var(--round-accent, #2f3c4d) 55%, #2f3c4d);
+  background: #151c24;
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--round-accent, #5b8cff) 10%, transparent);
+}
+
+.round-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.round-card__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.round-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--round-accent, #3d4a5c) 55%, #3d4a5c);
+  background: color-mix(in srgb, var(--round-accent, #0f1419) 12%, #0f1419);
+  font-weight: 750;
+  font-size: 0.85rem;
+  color: #e2e8f0;
+}
+
+.round-player {
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.round-meta {
+  color: #cbd5e1;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.throw-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.throw-row {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid #223042;
+  background: #0f1419;
+}
+
+.throw-num {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  color: #e2e8f0;
+  background: #151c24;
+  border: 1px solid #2f3c4d;
+}
+
+.throw-main {
+  display: grid;
+  gap: 2px;
+}
+
+.throw-hit {
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.throw-sub {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: baseline;
+  color: #cbd5e1;
+  font-size: 0.9rem;
+}
+
+.throw-delta {
+  color: #94a3b8;
+  font-variant-numeric: tabular-nums;
+}
+
+.skeleton-card {
+  height: 160px;
+  border-radius: 16px;
+  background: linear-gradient(90deg, #131a22 0%, #1a2330 50%, #131a22 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.status {
+  display: grid;
+  gap: 10px;
+}
+
+.status--error {
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px dashed #c25a5a;
+  background: #1a1115;
+  color: #ffb4b4;
+  text-align: center;
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+}
+
+.btn {
+  font: inherit;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid #3d4a5c;
+  background: #151c24;
+  color: #e2e8f0;
+  cursor: pointer;
+  font-weight: 600;
+}

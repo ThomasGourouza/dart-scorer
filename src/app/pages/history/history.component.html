@@ -1,0 +1,64 @@
+<section class="history-page">
+  <header class="page-head">
+    <h1>History</h1>
+    <p class="muted">All saved games, most recent first.</p>
+  </header>
+
+  @if (state() === 'loading') {
+    <div class="status">
+      <div class="skeleton-card" aria-hidden="true"></div>
+      <div class="skeleton-card" aria-hidden="true"></div>
+      <div class="skeleton-card" aria-hidden="true"></div>
+    </div>
+  } @else if (state() === 'error') {
+    <div class="status status--error">
+      <p>{{ errorMsg() ?? 'Failed to load games.' }}</p>
+      <button type="button" class="btn" (click)="retry()">Retry</button>
+    </div>
+  } @else if (isEmpty()) {
+    <div class="status status--empty">
+      <p>No games saved yet. Finish a game to see it here.</p>
+      <a routerLink="/" class="btn btn--primary">Start a new game</a>
+    </div>
+  } @else {
+    <ul class="game-list">
+      @for (item of items(); track item.gameId) {
+        <li>
+          <a [routerLink]="['/history', item.gameId]" class="game-card">
+            <div class="game-card__row">
+              <div class="game-card__date">{{ formatDate(item.dateTime) }}</div>
+              <div class="game-card__meta">
+                <span>{{ item.playersCount }} players</span>
+                <span>{{ item.roundsCount }} rounds</span>
+                <span>{{ item.throwsCount }} throws</span>
+                <span>{{ formatDuration(item.durationSeconds) }}</span>
+              </div>
+            </div>
+
+            <div class="game-card__players">
+              @for (p of item.players; track p.playerIndex) {
+                <span
+                  class="player-chip"
+                  [class.player-chip--winner]="p.winner === true"
+                  [style.--chip-color]="playerColor(p)"
+                >
+                  <span class="player-chip__dot" aria-hidden="true"></span>
+                  <span class="player-chip__name">{{ p.playerName }}</span>
+                  @if (p.winner === true) {
+                    <span class="player-chip__badge" aria-label="winner">winner</span>
+                  }
+                </span>
+              }
+            </div>
+          </a>
+        </li>
+      }
+    </ul>
+
+    <nav class="pager" aria-label="Pagination">
+      <button type="button" class="btn" (click)="prev()" [disabled]="!hasPrev()">Previous</button>
+      <span class="pager__info">Page {{ page() + 1 }}</span>
+      <button type="button" class="btn" (click)="next()" [disabled]="!hasNext()">Next</button>
+    </nav>
+  }
+</section>

@@ -1,0 +1,187 @@
+<section class="stats-page">
+  <header class="page-head">
+    <h1>Stats</h1>
+    <p class="muted">Player performance across all saved games.</p>
+  </header>
+
+  <div class="stats-grid">
+    <aside class="player-pane" aria-label="Players">
+      <label class="search">
+        <span class="visually-hidden">Search players</span>
+        <input
+          type="search"
+          placeholder="Search players..."
+          [value]="searchQuery()"
+          (input)="onSearchInput($any($event.target).value)"
+          aria-label="Search players"
+        />
+      </label>
+
+      @if (playersState() === 'loading') {
+        <div class="skeleton-row" aria-hidden="true"></div>
+        <div class="skeleton-row" aria-hidden="true"></div>
+        <div class="skeleton-row" aria-hidden="true"></div>
+      } @else if (playersState() === 'error') {
+        <div class="status status--error">
+          <p>{{ errorMsg() ?? 'Failed to load players.' }}</p>
+          <button type="button" class="btn" (click)="retry()">Retry</button>
+        </div>
+      } @else if (!hasPlayers()) {
+        <div class="status status--empty">
+          <p>No players yet. Finish a game to populate stats.</p>
+        </div>
+      } @else {
+        <ul class="player-list">
+          @for (p of filteredPlayers(); track p.playerName) {
+            <li>
+              <button
+                type="button"
+                class="player-item"
+                [class.player-item--active]="selectedName() === p.playerName"
+                (click)="selectPlayer(p.playerName)"
+              >
+                <span class="player-item__name">{{ p.playerName }}</span>
+                <span class="player-item__meta">
+                  {{ p.gamesPlayed }} games · {{ pct(p.winRate) }} wins
+                </span>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </aside>
+
+    <section class="detail-pane" aria-label="Stats detail">
+      <form class="filters" (submit)="$event.preventDefault(); applyFilters()">
+        <div class="filter-group">
+          <label>
+            <span>From</span>
+            <input
+              type="date"
+              [value]="fromDate() ?? ''"
+              (change)="onFromChange($any($event.target).value)"
+            />
+          </label>
+          <label>
+            <span>To</span>
+            <input
+              type="date"
+              [value]="toDate() ?? ''"
+              (change)="onToChange($any($event.target).value)"
+            />
+          </label>
+          <label>
+            <span>Variant</span>
+            <select
+              [value]="variantFilter() ?? ''"
+              (change)="onVariantChange($any($event.target).value)"
+            >
+              <option value="">All</option>
+              <option value="301">301</option>
+              <option value="501">501</option>
+            </select>
+          </label>
+        </div>
+        <div class="filter-actions">
+          <button type="submit" class="btn btn--primary">Apply</button>
+          <button type="button" class="btn" (click)="resetFilters()">Reset</button>
+        </div>
+      </form>
+
+      @if (!selectedName()) {
+        <div class="status status--empty">
+          <p>Select a player to view stats.</p>
+        </div>
+      } @else if (statsState() === 'loading') {
+        <div class="kpi-grid">
+          <div class="skeleton-card" aria-hidden="true"></div>
+          <div class="skeleton-card" aria-hidden="true"></div>
+          <div class="skeleton-card" aria-hidden="true"></div>
+          <div class="skeleton-card" aria-hidden="true"></div>
+        </div>
+      } @else if (statsState() === 'error') {
+        <div class="status status--error">
+          <p>{{ errorMsg() ?? 'Failed to load stats.' }}</p>
+          <button type="button" class="btn" (click)="retry()">Retry</button>
+        </div>
+      } @else if (stats()) {
+        <article class="stats-summary">
+          <header class="summary-head">
+            <h2>{{ stats()!.playerName }}</h2>
+            <p class="muted">
+              First: {{ formatDate(stats()!.firstPlayedAt) }} · Last:
+              {{ formatDate(stats()!.lastPlayedAt) }}
+            </p>
+          </header>
+
+          <div class="kpi-grid">
+            <div class="kpi">
+              <div class="kpi__label">Games</div>
+              <div class="kpi__value">{{ stats()!.gamesPlayed }}</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi__label">Wins</div>
+              <div class="kpi__value">{{ stats()!.wins }}</div>
+              <div class="kpi__sub">{{ pct(stats()!.winRate) }}</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi__label">Avg / dart</div>
+              <div class="kpi__value">{{ num(stats()!.averageDeltaPerThrow, 2) }}</div>
+              <div class="kpi__sub">over {{ stats()!.totalThrows }} throws</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi__label">Avg rounds / game</div>
+              <div class="kpi__value">{{ num(stats()!.averageRoundsPerGame, 1) }}</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi__label">Best round</div>
+              <div class="kpi__value">{{ stats()!.bestRoundPoints ?? '-' }}</div>
+              <div class="kpi__sub">points</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi__label">Best checkout</div>
+              <div class="kpi__value">{{ stats()!.bestCheckout ?? '-' }}</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi__label">Miss rate</div>
+              <div class="kpi__value">{{ pct(stats()!.missRate) }}</div>
+              <div class="kpi__sub">{{ stats()!.missCount }} misses</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi__label">Ton+ throws</div>
+              <div class="kpi__value">{{ stats()!.tonPlusCount }}</div>
+              <div class="kpi__sub">single dart ≥ 50</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi__label">Top sector</div>
+              <div class="kpi__value">{{ formatSector(stats()!.favoriteSector) }}</div>
+              @if (stats()!.favoriteSector) {
+                <div class="kpi__sub">{{ stats()!.favoriteSector!.hitCount }} hits</div>
+              }
+            </div>
+            <div class="kpi">
+              <div class="kpi__label">Highest single dart</div>
+              <div class="kpi__value">{{ stats()!.highestSingleDartScore }}</div>
+            </div>
+          </div>
+
+          @if (stats()!.perVariant.length > 0) {
+            <section class="variant-breakdown" aria-label="Per variant breakdown">
+              <h3>By variant</h3>
+              <ul class="variant-list">
+                @for (v of stats()!.perVariant; track v.variant) {
+                  <li class="variant-row">
+                    <span class="variant-name">{{ v.variant }}</span>
+                    <span class="variant-meta">
+                      {{ v.gamesPlayed }} games · {{ v.wins }} wins
+                    </span>
+                  </li>
+                }
+              </ul>
+            </section>
+          }
+        </article>
+      }
+    </section>
+  </div>
+</section>
