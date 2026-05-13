@@ -2,6 +2,7 @@ services:
   - type: web
     name: dart-scorer-frontend
     runtime: docker
+    branch: with-backend
     dockerfilePath: ./Dockerfile
     autoDeploy: true
     envVars:
