@@ -12,6 +12,17 @@ interface NavItem {
   readonly icon: string;
 }
 
+const SIDEBAR_COLLAPSED_KEY = 'dart-scorer-sidebar-collapsed';
+
+function readSidebarCollapsed(): boolean {
+  if (typeof localStorage === 'undefined') return false;
+  try {
+    return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, RouterLink, RouterLinkActive, StatusPillComponent],
@@ -26,6 +37,7 @@ export class AppComponent implements OnDestroy {
   private readonly health = inject(HealthService);
 
   protected readonly drawerOpen = signal(false);
+  protected readonly sidebarCollapsed = signal(readSidebarCollapsed());
   protected readonly navItems: readonly NavItem[] = [
     { path: '/play', label: 'Play', icon: 'play' },
     { path: '/history', label: 'History', icon: 'history' },
@@ -57,6 +69,15 @@ export class AppComponent implements OnDestroy {
 
   protected closeDrawer(): void {
     this.drawerOpen.set(false);
+  }
+
+  protected toggleSidebarCollapsed(): void {
+    this.sidebarCollapsed.update((v) => !v);
+    try {
+      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(this.sidebarCollapsed()));
+    } catch {
+      /* ignore quota / private mode */
+    }
   }
 
   protected abort(): void {
