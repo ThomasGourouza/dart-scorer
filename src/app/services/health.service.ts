@@ -19,11 +19,35 @@ interface RuntimeWindow extends Window {
   __dartScorerConfig?: RuntimeConfig;
 }
 
-const PROBE_TIMEOUT_MS = 5_000;
+const PROBE_TIMEOUT_MS = 35_000;
 const POLL_INTERVAL_READY_MS = 60_000;
 const POLL_INTERVAL_WAKING_MS = 3_000;
 const POLL_INTERVAL_DOWN_MS = 15_000;
-const WAKING_DEADLINE_MS = 45_000;
+/** Allow cold starts (Render/Neon) without flipping to Offline prematurely. */
+const WAKING_DEADLINE_MS = 600_000;
+
+function parseHealthPayload(raw: unknown): HealthResponse {
+  if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+    return raw as HealthResponse;
+  }
+  if (typeof raw === 'string') {
+    try {
+      return JSON.parse(raw) as HealthResponse;
+    } catch {
+      return {};
+    }
+  }
+  return {};
+}
+
+function dbComponentStatus(components: Record<string, { status?: string }>): string | undefined {
+  const db =
+    components['db'] ??
+    components['jdbc'] ??
+    components['dataSource'] ??
+    components['datasource'];
+  return db?.status;
+}
 
 @Injectable({ providedIn: 'root' })
 export class HealthService {
@@ -72,13 +96,11 @@ export class HealthService {
       .pipe(
         timeout(PROBE_TIMEOUT_MS),
         switchMap((response) => {
-          const body = response.body ?? {};
+          const body = parseHealthPayload(response.body);
           const components = body.components ?? {};
           const apiUp = (body.status ?? '').toUpperCase() === 'UP';
-          const dbComponent = components['db'];
-          const dbUp = dbComponent
-            ? (dbComponent.status ?? '').toUpperCase() === 'UP'
-            : apiUp;
+          const dbStatus = dbComponentStatus(components);
+          const dbUp = dbStatus ? dbStatus.toUpperCase() === 'UP' : apiUp;
           this.apiUpSignal.set(apiUp);
           this.dbUpSignal.set(dbUp);
           if (apiUp && dbUp) return of<HealthStatus>('ready');
@@ -86,12 +108,14 @@ export class HealthService {
         }),
         catchError((err: unknown) => {
           if (err instanceof HttpErrorResponse && err.status >= 400 && err.status < 600) {
-            const body = err.error as HealthResponse | null | undefined;
-            const status = (body?.status ?? '').toUpperCase();
+            const body = parseHealthPayload(err.error);
+            const status = (body.status ?? '').toUpperCase();
             if (status === 'DOWN' || status === 'OUT_OF_SERVICE') {
-              const dbStatus = (body?.components?.['db']?.status ?? '').toUpperCase();
+              const components = body.components ?? {};
+              const dbStatus = dbComponentStatus(components);
+              const dbUp = dbStatus ? dbStatus.toUpperCase() === 'UP' : false;
               this.apiUpSignal.set(true);
-              this.dbUpSignal.set(dbStatus === 'UP');
+              this.dbUpSignal.set(dbUp);
               return of<HealthStatus>('down');
             }
           }
