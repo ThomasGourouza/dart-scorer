@@ -68,7 +68,39 @@
   border-radius: 999px;
   border: 1px solid #2a3441;
   background: #0f1419;
+  font: inherit;
   font-size: 0.85rem;
+  color: inherit;
+  cursor: pointer;
+  transition: opacity 0.15s ease, filter 0.15s ease, border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.radar__legend-item:hover {
+  border-color: #3d5a7f;
+}
+
+.radar__legend-item:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 2px;
+}
+
+.radar__legend-item--off {
+  opacity: 0.45;
+  filter: grayscale(0.6);
+  text-decoration: line-through;
+}
+
+.radar__legend-item--off .radar__legend-dot {
+  background: #475569 !important;
+}
+
+.radar__empty {
+  margin: 0;
+  padding: 32px 12px;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  text-align: center;
 }
 
 .radar__legend-dot {

@@ -49,6 +49,8 @@ export interface PlayerCompareDto {
   readonly winRate: number;
   readonly averageDeltaPerThrow: number;
   readonly bestCheckout: number | null;
+  readonly bestRound: number | null;
+  readonly firstPlayerWinRate: number;
   readonly tonPlusRoundCount: number;
   readonly dominantColor: string | null;
 }

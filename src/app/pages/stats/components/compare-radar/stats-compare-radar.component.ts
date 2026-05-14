@@ -1,9 +1,28 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  input,
+  signal,
+} from '@angular/core';
 import { PlayerCompareDto } from '../../../../services/stats-api.service';
-import { PLAYER_COLOR_PALETTE, getPlayerColor } from '../../../../theme/player-colors';
+import {
+  PLAYER_COLOR_PALETTE,
+  PlayerColorDef,
+  getPlayerColor,
+} from '../../../../theme/player-colors';
+
+type AxisKey =
+  | 'bestRound'
+  | 'firstPlayerWinRate'
+  | 'winRate'
+  | 'avgDart'
+  | 'bestCheckout'
+  | 'tonPlus';
 
 interface RadarAxis {
-  readonly key: 'games' | 'wins' | 'winRate' | 'avgDart' | 'bestCheckout' | 'tonPlus';
+  readonly key: AxisKey;
   readonly label: string;
   readonly max: number;
   readonly format: (value: number) => string;
@@ -44,22 +63,33 @@ export class StatsCompareRadarComponent {
   protected readonly radius = RADIUS;
   protected readonly ringRadii = RING_LEVELS.map((l) => l * RADIUS);
 
+  // Names of players currently rendered on the chart. Defaults to every name
+  // present in `players()`; reconciled by the effect below whenever the input
+  // changes (e.g. a fresh /compare response with a different roster).
+  protected readonly visibleNames = signal<ReadonlySet<string>>(new Set());
+
+  protected readonly visiblePlayers = computed(() =>
+    this.players().filter((p) => this.visibleNames().has(p.playerName)),
+  );
+
   protected readonly axes = computed<readonly RadarAxis[]>(() => {
-    const players = this.players();
-    const games = players.map((p) => p.gamesPlayed);
-    const wins = players.map((p) => p.wins);
+    const players = this.visiblePlayers();
+    const bestRound = players.map((p) => p.bestRound ?? 0);
+    const firstWinRate = players.map((p) => p.firstPlayerWinRate);
     const winRate = players.map((p) => p.winRate);
     const avgDart = players.map((p) => p.averageDeltaPerThrow);
     const bestCheckout = players.map((p) => p.bestCheckout ?? 0);
     const tonPlus = players.map((p) => p.tonPlusRoundCount);
 
-    const definitions: Array<Omit<RadarAxis, 'x' | 'y' | 'labelX' | 'labelY' | 'labelAnchor' | 'maxLabel'>> = [
-      { key: 'games',        label: 'Games',         max: max(games),        format: fmtInt },
-      { key: 'wins',         label: 'Wins',          max: max(wins),         format: fmtInt },
-      { key: 'winRate',      label: 'Win rate',      max: max(winRate),      format: fmtPct },
-      { key: 'avgDart',      label: 'Avg / dart',    max: max(avgDart),      format: (v) => v.toFixed(2) },
-      { key: 'bestCheckout', label: 'Best checkout', max: max(bestCheckout), format: fmtInt },
-      { key: 'tonPlus',      label: 'Ton+',          max: max(tonPlus),      format: fmtInt },
+    const definitions: Array<
+      Omit<RadarAxis, 'x' | 'y' | 'labelX' | 'labelY' | 'labelAnchor' | 'maxLabel'>
+    > = [
+      { key: 'bestRound',          label: 'Best round',     max: max(bestRound),    format: fmtInt },
+      { key: 'firstPlayerWinRate', label: 'Win rate (1st)', max: max(firstWinRate), format: fmtPct },
+      { key: 'winRate',            label: 'Win rate',       max: max(winRate),      format: fmtPct },
+      { key: 'avgDart',            label: 'Avg / dart',     max: max(avgDart),      format: (v) => v.toFixed(2) },
+      { key: 'bestCheckout',       label: 'Best checkout',  max: max(bestCheckout), format: fmtInt },
+      { key: 'tonPlus',            label: 'Ton+',           max: max(tonPlus),      format: fmtInt },
     ];
 
     const labelOffset = 18;
@@ -86,8 +116,8 @@ export class StatsCompareRadarComponent {
 
   protected readonly series = computed<readonly RadarSeries[]>(() => {
     const axes = this.axes();
-    return this.players().map((player, idx) => {
-      const palette = resolveColor(player.dominantColor, idx);
+    return this.visiblePlayers().map((player, idx) => {
+      const palette = this.colorFor(player, idx);
       const values = axes.map((axis) => valueForAxis(player, axis));
       const vertices = axes.map((axis, i) => {
         const norm = axis.max > 0 ? Math.max(0, values[i]!) / axis.max : 0;
@@ -108,6 +138,37 @@ export class StatsCompareRadarComponent {
       };
     });
   });
+
+  constructor() {
+    effect(
+      () => {
+        const names = new Set(this.players().map((p) => p.playerName));
+        this.visibleNames.set(names);
+      },
+      { allowSignalWrites: true },
+    );
+  }
+
+  protected toggle(name: string): void {
+    const next = new Set(this.visibleNames());
+    if (next.has(name)) next.delete(name);
+    else next.add(name);
+    this.visibleNames.set(next);
+  }
+
+  protected isVisible(name: string): boolean {
+    return this.visibleNames().has(name);
+  }
+
+  protected legendColor(player: PlayerCompareDto): string {
+    const idx = this.players().findIndex((p) => p.playerName === player.playerName);
+    return this.colorFor(player, Math.max(0, idx)).accent;
+  }
+
+  private colorFor(player: PlayerCompareDto, fallbackIndex: number): PlayerColorDef {
+    if (player.dominantColor) return getPlayerColor(player.dominantColor);
+    return PLAYER_COLOR_PALETTE[fallbackIndex % PLAYER_COLOR_PALETTE.length]!;
+  }
 }
 
 function angleForIndex(index: number, total: number): number {
@@ -122,10 +183,10 @@ function max(values: readonly number[]): number {
 
 function valueForAxis(player: PlayerCompareDto, axis: RadarAxis): number {
   switch (axis.key) {
-    case 'games':
-      return player.gamesPlayed;
-    case 'wins':
-      return player.wins;
+    case 'bestRound':
+      return player.bestRound ?? 0;
+    case 'firstPlayerWinRate':
+      return player.firstPlayerWinRate;
     case 'winRate':
       return player.winRate;
     case 'avgDart':
@@ -135,11 +196,6 @@ function valueForAxis(player: PlayerCompareDto, axis: RadarAxis): number {
     case 'tonPlus':
       return player.tonPlusRoundCount;
   }
-}
-
-function resolveColor(id: string | null, fallbackIndex: number) {
-  if (id) return getPlayerColor(id);
-  return PLAYER_COLOR_PALETTE[fallbackIndex % PLAYER_COLOR_PALETTE.length]!;
 }
 
 function fmtInt(v: number): string {
