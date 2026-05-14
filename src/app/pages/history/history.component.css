@@ -80,7 +80,8 @@
 
 .toolbar-dir {
   min-width: 72px;
-  align-self: stretch;
+  min-height: 38px;
+  padding: 0 12px;
 }
 
 .toolbar-actions {
