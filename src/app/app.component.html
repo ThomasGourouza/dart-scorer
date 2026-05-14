@@ -1,8 +1,4 @@
-<div
-  class="layout"
-  [class.layout--drawer-open]="drawerOpen()"
-  [class.layout--sidebar-collapsed]="sidebarCollapsed()"
->
+<div class="layout" [class.layout--drawer-open]="drawerOpen()">
   <header class="topbar">
     <button
       type="button"
@@ -22,8 +18,6 @@
       <span class="brand-text">{{ title }}</span>
     </a>
 
-    <app-status-pill class="topbar__status" />
-
     <button
       type="button"
       class="abort"
@@ -40,21 +34,6 @@
     [class.sidenav--open]="drawerOpen()"
     aria-label="Primary navigation"
   >
-    <div class="sidenav__toolbar">
-      <button
-        type="button"
-        class="sidenav-collapse"
-        (click)="toggleSidebarCollapsed()"
-        [attr.aria-expanded]="!sidebarCollapsed()"
-        aria-controls="primary-nav"
-        [attr.aria-label]="sidebarCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
-      >
-        <span class="sidenav-collapse__glyph" aria-hidden="true">{{
-          sidebarCollapsed() ? '»' : '«'
-        }}</span>
-      </button>
-    </div>
-
     <nav class="sidenav__inner">
       <ul class="nav-list">
         @for (item of navItems; track item.path) {
@@ -64,7 +43,6 @@
               routerLinkActive="nav-link--active"
               [routerLinkActiveOptions]="{ exact: false }"
               class="nav-link"
-              [attr.title]="item.label"
             >
               <span class="nav-icon" [attr.data-icon]="item.icon" aria-hidden="true"></span>
               <span class="nav-label">{{ item.label }}</span>
@@ -75,10 +53,7 @@
     </nav>
 
     <div class="sidenav__foot">
-      <a routerLink="/" class="nav-cta" title="New game">
-        <span class="nav-cta__icon" aria-hidden="true">+</span>
-        <span class="nav-cta__label">New game</span>
-      </a>
+      <a routerLink="/" class="nav-cta">New game</a>
     </div>
   </aside>
 

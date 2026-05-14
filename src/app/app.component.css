@@ -84,12 +84,6 @@
   display: block;
 }
 
-.topbar__status {
-  display: inline-flex;
-  align-items: center;
-  flex: 0 0 auto;
-}
-
 .abort {
   font: inherit;
   min-height: 44px;
@@ -125,43 +119,6 @@
 .sidenav--open {
   transform: translateX(0);
   box-shadow: 18px 0 40px rgba(0, 0, 0, 0.55);
-}
-
-.sidenav__toolbar {
-  display: none;
-}
-
-.sidenav-collapse {
-  font: inherit;
-  width: 40px;
-  height: 40px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  border: 1px solid var(--outline-border);
-  background: transparent;
-  color: var(--outline-fg);
-  cursor: pointer;
-  padding: 0;
-  transition: background 0.15s ease, border-color 0.15s ease;
-}
-
-.sidenav-collapse:hover {
-  background: var(--outline-hover-bg);
-  border-color: var(--accent);
-}
-
-.sidenav-collapse:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.sidenav-collapse__glyph {
-  font-size: 1.15rem;
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.06em;
 }
 
 .sidenav__inner {
@@ -252,10 +209,7 @@
 }
 
 .nav-cta {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  display: block;
   text-align: center;
   text-decoration: none;
   padding: 12px 14px;
@@ -265,17 +219,6 @@
   border: 1px solid var(--accent);
   font-weight: 700;
   transition: background 0.15s ease, color 0.15s ease;
-}
-
-.nav-cta__icon {
-  display: none;
-  font-size: 1.35rem;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.nav-cta__label {
-  line-height: 1.2;
 }
 
 .nav-cta:hover {
@@ -315,29 +258,12 @@
       'side main';
   }
 
-  .layout.layout--sidebar-collapsed {
-    grid-template-columns: 72px 1fr;
-  }
-
   .topbar {
     padding-left: 24px;
   }
 
   .menu-btn {
     display: none;
-  }
-
-  .sidenav__toolbar {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    flex-shrink: 0;
-    padding: 10px 10px 8px;
-    border-bottom: 1px solid #1d2731;
-  }
-
-  .layout--sidebar-collapsed .sidenav__toolbar {
-    justify-content: center;
   }
 
   .sidenav {
@@ -352,32 +278,6 @@
     width: 240px;
     height: 100dvh;
     box-shadow: none;
-    transition: width 0.2s ease;
-  }
-
-  .layout--sidebar-collapsed .sidenav {
-    width: 72px;
-  }
-
-  .layout--sidebar-collapsed .nav-label {
-    display: none;
-  }
-
-  .layout--sidebar-collapsed .nav-link {
-    justify-content: center;
-    padding: 12px 10px;
-  }
-
-  .layout--sidebar-collapsed .nav-cta__label {
-    display: none;
-  }
-
-  .layout--sidebar-collapsed .nav-cta__icon {
-    display: inline;
-  }
-
-  .layout--sidebar-collapsed .nav-cta {
-    padding: 12px 10px;
   }
 
   .scrim {
