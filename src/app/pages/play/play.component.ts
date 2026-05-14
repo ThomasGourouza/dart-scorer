@@ -7,9 +7,9 @@ import { ScoreboardComponent } from '../../components/scoreboard/scoreboard.comp
 import { getPlayerColor } from '../../theme/player-colors';
 import { groupHistoryByTurn } from '../../services/history/game-history-grouping';
 import type { GameHistoryTurn } from '../../services/history/game-history.model';
-import { EmailHistoryDialogComponent } from './components/email-history-dialog/email-history-dialog.component';
 import { GameHistoryTimelineComponent } from './components/game-history-timeline/game-history-timeline.component';
 import { WinnerCardComponent } from './components/winner-card/winner-card.component';
+import { ConfettiComponent } from '../../components/confetti/confetti.component';
 import { GameApiService } from '../../services/game-api.service';
 
 // Short feedback animation between attempts in the same round.
@@ -28,8 +28,8 @@ export type AnimLayer = 'idle' | 'dart' | 'round' | 'undo';
     NgStyle,
     ScoreboardComponent,
     WinnerCardComponent,
-    EmailHistoryDialogComponent,
     GameHistoryTimelineComponent,
+    ConfettiComponent,
   ],
   templateUrl: './play.component.html',
   styleUrl: './play.component.css',
@@ -49,7 +49,6 @@ export class PlayComponent implements OnDestroy {
   readonly selectedBase = signal<number>(0);
   multiplier: Multiplier = 1;
   readonly animState = signal<AnimLayer>('idle');
-  readonly emailDialogOpen = signal(false);
   readonly historyTurns = computed<GameHistoryTurn[]>(() =>
     groupHistoryByTurn(this.game.history()),
   );
@@ -170,38 +169,6 @@ export class PlayComponent implements OnDestroy {
     this.game.abortGame();
     this.gameSavedToBackend = false;
     void this.router.navigate(['/']);
-  }
-
-  downloadHistory(): void {
-    const csv = this.game.getHistoryCsv();
-    const started = this.game.startedAtIso() ?? new Date().toISOString();
-    const stamp = started.replaceAll(/[-:]/g, '').replaceAll('T', '-').slice(0, 15);
-    const filename = `dart-scorer-history-${stamp}.csv`;
-
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  openEmailDialog(): void {
-    this.emailDialogOpen.set(true);
-  }
-
-  closeEmailDialog(): void {
-    this.emailDialogOpen.set(false);
-  }
-
-  sendEmailHistory(to: string): void {
-    const csv = this.game.getHistoryCsv();
-    const subject = 'Dart scorer - game history (CSV)';
-    const body = `Hi,\n\nHere is the game history CSV:\n\n${csv}`;
-    const mailto = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = mailto;
-    this.emailDialogOpen.set(false);
   }
 
   private saveCompletedGame(): void {

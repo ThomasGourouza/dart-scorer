@@ -23,21 +23,15 @@
       }
 
       @if (game.isFinished()) {
+        <app-confetti />
+
         <app-winner-card
           [winnerName]="winnerName()"
           [disabled]="animState() !== 'idle'"
-          (downloadHistory)="downloadHistory()"
-          (emailHistory)="openEmailDialog()"
           (newGame)="newGame()"
         />
 
         <app-game-history-timeline [turns]="historyTurns()" [players]="game.playersList()" />
-
-        <app-email-history-dialog
-          [open]="emailDialogOpen()"
-          (close)="closeEmailDialog()"
-          (submitEmail)="sendEmailHistory($event)"
-        />
       } @else {
         <header class="round-header">
           <div class="round-header__main">

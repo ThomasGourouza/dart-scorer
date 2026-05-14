@@ -10,8 +10,5 @@ export class WinnerCardComponent {
   @Input({ required: true }) winnerName = '';
   @Input() disabled = false;
 
-  @Output() downloadHistory = new EventEmitter<void>();
-  @Output() emailHistory = new EventEmitter<void>();
   @Output() newGame = new EventEmitter<void>();
 }
-

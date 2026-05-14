@@ -16,20 +16,6 @@
   color: #cbd5e1;
 }
 
-.winner-actions {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-  max-width: 320px;
-  margin: 0 auto 14px;
-}
-
-@media (min-width: 420px) {
-  .winner-actions {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
 .secondary {
   width: 100%;
   min-height: 52px;
