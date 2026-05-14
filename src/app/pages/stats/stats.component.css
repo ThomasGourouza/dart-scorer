@@ -19,6 +19,25 @@
   color: #94a3b8;
 }
 
+.all-players-compare {
+  border: 1px solid #2a3441;
+  background: #151c24;
+  border-radius: 16px;
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+}
+
+.all-players-compare h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  align-self: start;
+  justify-self: start;
+}
+
 .stats-grid {
   display: grid;
   gap: 18px;

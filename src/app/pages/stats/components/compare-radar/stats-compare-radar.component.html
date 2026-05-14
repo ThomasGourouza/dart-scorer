@@ -1,0 +1,87 @@
+@if (players().length > 0) {
+  <div class="radar">
+    <svg
+      class="radar__svg"
+      [attr.viewBox]="'0 0 ' + svgSize + ' ' + svgSize"
+      [attr.width]="svgSize"
+      [attr.height]="svgSize"
+      role="img"
+      aria-label="Players comparison radar chart"
+    >
+      <g class="radar__grid">
+        @for (r of ringRadii; track r) {
+          <circle
+            class="radar__ring"
+            [attr.cx]="center"
+            [attr.cy]="center"
+            [attr.r]="r"
+          />
+        }
+        @for (axis of axes(); track axis.key) {
+          <line
+            class="radar__spoke"
+            [attr.x1]="center"
+            [attr.y1]="center"
+            [attr.x2]="axis.x"
+            [attr.y2]="axis.y"
+          />
+        }
+      </g>
+
+      <g class="radar__series">
+        @for (s of series(); track s.playerName) {
+          <polygon
+            class="radar__polygon"
+            [attr.points]="s.polygonPoints"
+            [attr.stroke]="s.stroke"
+            [attr.fill]="s.fill"
+          />
+          @for (v of s.vertices; track $index) {
+            <circle
+              class="radar__dot"
+              [attr.cx]="v.x"
+              [attr.cy]="v.y"
+              [attr.fill]="s.stroke"
+              r="3"
+            />
+          }
+        }
+      </g>
+
+      <g class="radar__labels">
+        @for (axis of axes(); track axis.key) {
+          <text
+            class="radar__axis-label"
+            [attr.x]="axis.labelX"
+            [attr.y]="axis.labelY"
+            [attr.text-anchor]="axis.labelAnchor"
+            dominant-baseline="middle"
+          >
+            {{ axis.label }}
+          </text>
+          @if (axis.maxLabel) {
+            <text
+              class="radar__axis-max"
+              [attr.x]="axis.labelX"
+              [attr.y]="axis.labelY + 12"
+              [attr.text-anchor]="axis.labelAnchor"
+              dominant-baseline="hanging"
+            >
+              max {{ axis.maxLabel }}
+            </text>
+          }
+        }
+      </g>
+    </svg>
+
+    <ul class="radar__legend">
+      @for (s of series(); track s.playerName) {
+        <li class="radar__legend-item">
+          <span class="radar__legend-dot" [style.background]="s.stroke"></span>
+          <span class="radar__legend-name">{{ s.playerName }}</span>
+          <span class="radar__legend-games">{{ s.gamesPlayed }} games</span>
+        </li>
+      }
+    </ul>
+  </div>
+}

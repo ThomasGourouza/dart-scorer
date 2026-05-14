@@ -20,6 +20,9 @@ export interface PlayerStatsDto {
   readonly gamesPlayed: number;
   readonly wins: number;
   readonly winRate: number;
+  readonly firstPlayerGamesPlayed: number;
+  readonly firstPlayerWins: number;
+  readonly firstPlayerWinRate: number;
   readonly totalThrows: number;
   readonly totalRounds: number;
   readonly totalDelta: number;
@@ -28,7 +31,7 @@ export interface PlayerStatsDto {
   readonly averageRoundsPerGame: number;
   readonly missCount: number;
   readonly missRate: number;
-  readonly tonPlusCount: number;
+  readonly tonPlusRoundCount: number;
   readonly avgFirstThreeRoundsPoints: number;
   readonly bestRoundPoints: number | null;
   readonly bestCheckout: number | null;
@@ -37,6 +40,21 @@ export interface PlayerStatsDto {
   readonly perVariant: readonly PlayerVariantBreakdownDto[];
   readonly firstPlayedAt: string | null;
   readonly lastPlayedAt: string | null;
+}
+
+export interface PlayerCompareDto {
+  readonly playerName: string;
+  readonly gamesPlayed: number;
+  readonly wins: number;
+  readonly winRate: number;
+  readonly averageDeltaPerThrow: number;
+  readonly bestCheckout: number | null;
+  readonly tonPlusRoundCount: number;
+  readonly dominantColor: string | null;
+}
+
+export interface PlayersCompareDto {
+  readonly players: readonly PlayerCompareDto[];
 }
 
 export interface PlayerVariantBreakdownDto {
@@ -66,6 +84,10 @@ export class StatsApiService {
 
   listPlayers(): Observable<PlayersListDto> {
     return this.http.get<PlayersListDto>(`${this.apiBaseUrl}/api/stats/players`);
+  }
+
+  comparePlayers(): Observable<PlayersCompareDto> {
+    return this.http.get<PlayersCompareDto>(`${this.apiBaseUrl}/api/stats/compare`);
   }
 
   getPlayerStats(

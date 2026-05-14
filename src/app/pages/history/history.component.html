@@ -4,6 +4,122 @@
     <p class="muted">All saved games, most recent first.</p>
   </header>
 
+  <form class="history-toolbar" (submit)="$event.preventDefault(); applyFilters()">
+    <div class="toolbar-row toolbar-row--filters">
+      <label>
+        <span>From</span>
+        <input
+          type="date"
+          [value]="fromDate() ?? ''"
+          (change)="onDateInput('from', $any($event.target).value)"
+        />
+      </label>
+      <label>
+        <span>To</span>
+        <input
+          type="date"
+          [value]="toDate() ?? ''"
+          (change)="onDateInput('to', $any($event.target).value)"
+        />
+      </label>
+      <label>
+        <span>Winner</span>
+        <input
+          type="search"
+          placeholder="name contains..."
+          [value]="winnerLike() ?? ''"
+          (input)="onTextInput('winner', $any($event.target).value)"
+        />
+      </label>
+      <label>
+        <span>Player</span>
+        <input
+          type="search"
+          placeholder="any participant..."
+          [value]="playerLike() ?? ''"
+          (input)="onTextInput('player', $any($event.target).value)"
+        />
+      </label>
+      <label>
+        <span>Min duration (min)</span>
+        <input
+          type="number"
+          inputmode="numeric"
+          min="0"
+          [value]="minDurationMin() ?? ''"
+          (input)="onNumberInput('minDuration', $any($event.target).value)"
+        />
+      </label>
+      <label>
+        <span>Max duration (min)</span>
+        <input
+          type="number"
+          inputmode="numeric"
+          min="0"
+          [value]="maxDurationMin() ?? ''"
+          (input)="onNumberInput('maxDuration', $any($event.target).value)"
+        />
+      </label>
+      <label>
+        <span>Min rounds</span>
+        <input
+          type="number"
+          inputmode="numeric"
+          min="0"
+          [value]="minRounds() ?? ''"
+          (input)="onNumberInput('minRounds', $any($event.target).value)"
+        />
+      </label>
+      <label>
+        <span>Max rounds</span>
+        <input
+          type="number"
+          inputmode="numeric"
+          min="0"
+          [value]="maxRounds() ?? ''"
+          (input)="onNumberInput('maxRounds', $any($event.target).value)"
+        />
+      </label>
+    </div>
+
+    <div class="toolbar-row toolbar-row--controls">
+      <label class="toolbar-control">
+        <span>Sort by</span>
+        <select [value]="sort()" (change)="onSortChange($any($event.target).value)">
+          <option value="date">Date</option>
+          <option value="duration">Duration</option>
+          <option value="rounds">Rounds</option>
+          <option value="throws">Throws</option>
+          <option value="players">Players</option>
+          <option value="winner">Winner</option>
+        </select>
+      </label>
+      <button
+        type="button"
+        class="btn toolbar-dir"
+        (click)="onDirToggle()"
+        [attr.aria-label]="dir() === 'asc' ? 'Sort ascending' : 'Sort descending'"
+      >
+        {{ dir() === 'asc' ? 'Asc' : 'Desc' }}
+      </button>
+      <label class="toolbar-control">
+        <span>Per page</span>
+        <select
+          [value]="pageSize()"
+          (change)="onPageSizeChange(+$any($event.target).value)"
+        >
+          @for (n of pageSizeOptions; track n) {
+            <option [value]="n">{{ n }}</option>
+          }
+        </select>
+      </label>
+      <div class="toolbar-actions">
+        <button type="submit" class="btn btn--primary">Apply</button>
+        <button type="button" class="btn" (click)="resetFilters()">Reset</button>
+      </div>
+    </div>
+  </form>
+
   @if (state() === 'loading') {
     <div class="status">
       <div class="skeleton-card" aria-hidden="true"></div>
@@ -57,7 +173,10 @@
 
     <nav class="pager" aria-label="Pagination">
       <button type="button" class="btn" (click)="prev()" [disabled]="!hasPrev()">Previous</button>
-      <span class="pager__info">Page {{ page() + 1 }}</span>
+      <span class="pager__info">
+        Page {{ page() + 1 }} / {{ totalPages() || 1 }}
+        <span class="pager__total"> &middot; {{ total() }} games</span>
+      </span>
       <button type="button" class="btn" (click)="next()" [disabled]="!hasNext()">Next</button>
     </nav>
   }

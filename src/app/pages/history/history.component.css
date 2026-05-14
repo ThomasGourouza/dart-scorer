@@ -19,6 +19,80 @@
   margin: 0;
 }
 
+.history-toolbar {
+  border: 1px solid #2a3441;
+  background: #151c24;
+  border-radius: 16px;
+  padding: 14px;
+  display: grid;
+  gap: 14px;
+}
+
+.toolbar-row {
+  display: grid;
+  gap: 10px;
+}
+
+.toolbar-row--filters {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 720px) {
+  .toolbar-row--filters {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.toolbar-row--controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px;
+}
+
+.toolbar-row label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.toolbar-row input,
+.toolbar-row select {
+  font: inherit;
+  min-height: 38px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 1px solid #2a3441;
+  background: #0f1419;
+  color: #e2e8f0;
+}
+
+.toolbar-row input:focus-visible,
+.toolbar-row select:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 2px;
+}
+
+.toolbar-control {
+  min-width: 130px;
+}
+
+.toolbar-dir {
+  min-width: 72px;
+  align-self: stretch;
+}
+
+.toolbar-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 10px;
+}
+
+.pager__total {
+  color: #94a3b8;
+}
+
 .game-list {
   list-style: none;
   padding: 0;

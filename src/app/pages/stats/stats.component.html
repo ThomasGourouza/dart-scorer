@@ -4,6 +4,13 @@
     <p class="muted">Player performance across all saved games.</p>
   </header>
 
+  @if (compareData().length > 0) {
+    <section class="all-players-compare" aria-label="All players comparison">
+      <h2>All players</h2>
+      <app-stats-compare-radar [players]="compareData()" />
+    </section>
+  }
+
   <div class="stats-grid">
     <aside class="player-pane" aria-label="Players">
       <label class="search">
@@ -116,13 +123,16 @@
 
           <div class="kpi-grid">
             <div class="kpi">
-              <div class="kpi__label">Games</div>
-              <div class="kpi__value">{{ stats()!.gamesPlayed }}</div>
+              <div class="kpi__label">Wins</div>
+              <div class="kpi__value">{{ stats()!.wins }}/{{ stats()!.gamesPlayed }}</div>
+              <div class="kpi__sub">{{ pct(stats()!.winRate) }}</div>
             </div>
             <div class="kpi">
-              <div class="kpi__label">Wins</div>
-              <div class="kpi__value">{{ stats()!.wins }}</div>
-              <div class="kpi__sub">{{ pct(stats()!.winRate) }}</div>
+              <div class="kpi__label">Wins as first player</div>
+              <div class="kpi__value">
+                {{ stats()!.firstPlayerWins }}/{{ stats()!.firstPlayerGamesPlayed }}
+              </div>
+              <div class="kpi__sub">{{ pct(stats()!.firstPlayerWinRate) }}</div>
             </div>
             <div class="kpi">
               <div class="kpi__label">Avg / dart</div>
@@ -148,9 +158,9 @@
               <div class="kpi__sub">{{ stats()!.missCount }} misses</div>
             </div>
             <div class="kpi">
-              <div class="kpi__label">Ton+ throws</div>
-              <div class="kpi__value">{{ stats()!.tonPlusCount }}</div>
-              <div class="kpi__sub">single dart ≥ 50</div>
+              <div class="kpi__label">Ton+</div>
+              <div class="kpi__value">{{ stats()!.tonPlusRoundCount }}</div>
+              <div class="kpi__sub">100+ round</div>
             </div>
             <div class="kpi">
               <div class="kpi__label">Top sector</div>

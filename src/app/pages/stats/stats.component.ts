@@ -2,17 +2,19 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
+  PlayerCompareDto,
   PlayerStatsDto,
   PlayerSummaryDto,
   StatsApiService,
 } from '../../services/stats-api.service';
+import { StatsCompareRadarComponent } from './components/compare-radar/stats-compare-radar.component';
 
 type LoadState = 'idle' | 'loading' | 'ready' | 'error';
 
 @Component({
   selector: 'app-stats',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, StatsCompareRadarComponent],
   templateUrl: './stats.component.html',
   styleUrl: './stats.component.css',
 })
@@ -28,6 +30,7 @@ export class StatsComponent implements OnInit {
   readonly players = signal<readonly PlayerSummaryDto[]>([]);
   readonly selectedName = signal<string | null>(null);
   readonly stats = signal<PlayerStatsDto | null>(null);
+  readonly compareData = signal<readonly PlayerCompareDto[]>([]);
 
   readonly searchQuery = signal('');
   readonly fromDate = signal<string | null>(null);
@@ -71,6 +74,16 @@ export class StatsComponent implements OnInit {
         this.errorMsg.set(this.formatError(err));
         this.playersState.set('error');
       },
+    });
+    this.loadCompare();
+  }
+
+  private loadCompare(): void {
+    this.api.comparePlayers().subscribe({
+      next: (res) => this.compareData.set(res.players),
+      // Silent failure: the comparison radar is purely additive and shouldn't
+      // block the rest of the stats page if its dedicated endpoint fails.
+      error: () => this.compareData.set([]),
     });
   }
 
